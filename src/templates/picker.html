@@ -77,7 +77,7 @@
 					{% if entry.file %}
 					<form action="/reader">
 						<input type="hidden" name="file" value="{{ entry.absolute }}" />
-						<button>Selecionar arquivo</button>
+						<button disabled>Selecionar arquivo</button>
 					</form>
 					{% else%}
 					<form action="/reader">

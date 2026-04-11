@@ -1,3 +1,4 @@
+from itertools import chain
 import os
 from pathlib import Path
 from typing import TypedDict
@@ -30,3 +31,23 @@ def dir_entries(path: str) -> tuple[list[Entry], str]:
     prev = str(Path(path).parent)
 
     return files, prev
+
+
+SUPPORTED_FILE_EXTENSIONS = ["png", "jpeg", "jpg", "gif", "webp"]
+
+
+def list_images_from_folder(folder: str):
+    path = Path(folder)
+    if not path.is_dir():
+        raise ValueError("Path is not a folder")
+
+    it = chain(
+        *(
+            path.glob(f"**/*.{pat}", case_sensitive=False)
+            for pat in SUPPORTED_FILE_EXTENSIONS
+        )
+    )
+
+    images = [str(file) for file in it]
+    images.sort()
+    return images

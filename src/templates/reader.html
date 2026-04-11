@@ -2,9 +2,182 @@
 <html>
 	<head>
 		<title>Reader</title>
+		<style>
+			:root {
+				--img-margin: auto;
+				--direction: column;
+			}
+
+			body {
+				flex-direction: column;
+			}
+
+			.image-wrapper {
+				display: flex;
+				flex-direction: var(--direction);
+				justify-content: space-around;
+
+				img {
+					/* auto or zero to no margin in longstrip */
+					margin-bottom: var(--img-margin);
+
+					/* width: fit-content;
+                    height: fit-content;
+                    inline-size: fit-content;
+                    block-size: fit-content; */
+				}
+			}
+
+			.controls {
+				position: fixed;
+				bottom: 0;
+			}
+		</style>
 	</head>
 
 	<body>
-		TODO
+		<div id="imageWrapper" class="image-wrapper"></div>
+
+		<div class="controls">
+			<select id="pageSelector" onchange="changePageFromSelector()">
+				{% for i in pages %}
+				<option id="option-img-{{ loop.index }}">{{ loop.index }}</option>
+				{% endfor %}
+			</select>
+			<button onclick="padding()">add padding</button>
+			<button onclick="longstrip()">longstrip mode</button>
+			<button onclick="manga()">manga mode</button>
+		</div>
+
+		<script id="imagesJson" type="application/json">
+			{{ pages|tojson }}
+		</script>
+		<script>
+			"use strict";
+
+			// TODO: content fit options
+			// TODO: dark mode
+
+			const DISPLAY_MODE = Object.freeze({
+				LONG_SPREAD: "longspead",
+				SINGLE_PAGE: "singlepage"
+			});
+
+			let mode = DISPLAY_MODE.SINGLE_PAGE;
+			const images = JSON.parse(imagesJson.textContent);
+			let index = (Number.parseInt(new URLSearchParams(new URL(window.location).search).get("page")) || 1) - 1;
+
+			window.onload = (_) => {
+				updateSelector();
+				display(mode);
+			};
+
+			function display(newMode) {
+				// TODO: May we should not actually delete all the elements when its not need?
+				mode = newMode;
+				let maybeImgToScroolTo = null;
+				imageWrapper.querySelectorAll("*").forEach((e) => e.remove());
+				if (mode === DISPLAY_MODE.LONG_SPREAD) {
+					layoutLongstrip();
+					images.forEach((image, i) => {
+						const img = document.createElement("img");
+						img.src = image;
+						img.setAttribute("data-img-index", i.toString());
+						// Maybe add the option for lerping to the next image instead of jumping
+						img.addEventListener("click", nextImage);
+						imageWrapper.appendChild(img);
+
+						if (i === index) {
+							maybeImgToScroolTo = img;
+						}
+
+						if (i === images.length - 1) {
+							// NOTE: if i pass the img dimensions, set the size beforehand then i would not have to wait
+							//       for others images to load before scrolling into the right place.
+
+							// Scroll to current image index after the last image (and the others, i hope) is loaded
+							img.onload = () => {
+								if (maybeImgToScroolTo) {
+									maybeImgToScroolTo.scrollIntoView();
+								}
+							};
+							img.onerror = img.onload;
+						}
+					});
+				} else {
+					layoutManga();
+					const img = document.createElement("img");
+					img.src = images[index] ?? images[0];
+					img.setAttribute("data-img-index", "0");
+					img.addEventListener("click", nextImage);
+					imageWrapper.appendChild(img);
+				}
+			}
+
+			function updateSelector() {
+				pageSelector.value = index + 1;
+			}
+
+			function nextImage() {
+				changePage(index + 1);
+			}
+
+			function changePageFromSelector() {
+				changePage(pageSelector.value - 1);
+			}
+
+			function changePage(newIndex) {
+				if (newIndex >= images.length) {
+					newIndex = 0;
+				}
+
+				index = newIndex;
+				// TODO: make option scrolling into view be also "instant"
+
+				if (mode === DISPLAY_MODE.SINGLE_PAGE) {
+					const imgElement = imageWrapper.getElementsByTagName("img")[0];
+					imgElement.src = images[index];
+
+					// On single page mode we scroll back to the top when the image is replaced by the next
+					// TODO: make configurable
+					imageWrapper.scrollIntoView({ behavior: "smooth" });
+				} else if (mode === DISPLAY_MODE.LONG_SPREAD) {
+					// TODO: this can make the scroll go backwards if the user is
+					//       "between" two pages. To fix we need to get the index
+					//       from the image that the user actually clicked
+					const imgElement = imageWrapper.querySelector(`[data-img-index="${newIndex}"]`);
+					imgElement.scrollIntoView({ behavior: "smooth" });
+				}
+
+				let url = new URL(window.location.href);
+				url.searchParams.set("page", index + 1 + "");
+				window.history.pushState({}, "", url);
+				updateSelector();
+			}
+
+			const root = document.documentElement;
+			function padding() {
+				root.style.setProperty("--img-margin", "20px");
+			}
+
+			function layoutLongstrip() {
+				root.style.setProperty("--img-margin", "auto");
+				root.style.setProperty("--direction", "column");
+			}
+
+			function longstrip() {
+				display(DISPLAY_MODE.LONG_SPREAD);
+			}
+
+			function layoutManga() {
+				root.style.setProperty("--img-margin", "auto");
+				root.style.setProperty("--direction", "row");
+			}
+
+			function manga() {
+				display(DISPLAY_MODE.SINGLE_PAGE);
+				imageWrapper.scrollIntoView();
+			}
+		</script>
 	</body>
 </html>
