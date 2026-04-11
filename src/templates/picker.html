@@ -1,0 +1,93 @@
+<!doctype html>
+<html lang="pt-BR">
+	<head>
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		<meta charset="utf-8" />
+		<title>Lista de arquivos</title>
+		<style>
+			body {
+				background-color: gray;
+				display: flex;
+				height: 100dvh;
+				overflow: hidden;
+			}
+
+			main {
+				background-color: slategray;
+				border: 1px solid white;
+				margin: auto;
+				padding: 10px;
+				width: 70%;
+				height: 80%;
+			}
+
+			h1 {
+				text-overflow: ellipsis;
+				word-wrap: break-word;
+				@media (width <= 1000px) {
+					font-size: large;
+				}
+			}
+
+			.item-list {
+				overflow-y: scroll;
+				margin: 0;
+				padding: 0;
+				width: auto;
+				height: 80%;
+				.item:nth-child(odd) {
+					background-color: rgb(90, 103, 116);
+				}
+			}
+
+			.item {
+				display: grid;
+				grid-template-columns: auto 5rem;
+				justify-items: flex-start;
+				align-items: center;
+			}
+
+			.item p {
+				margin: 0;
+				overflow: hidden;
+				text-overflow: ellipsis;
+				white-space: nowrap;
+				color: cyan;
+			}
+		</style>
+	</head>
+
+	<body>
+		<main>
+			<h1>Indice de {{ current }}</h1>
+			<div>
+				<p><a href="/picker?path={{ prev }}">{{ prev }}</a> (parent)</p>
+			</div>
+			<div class="item-list">
+				{% for entry in entries %}
+				<div class="item">
+					<!-- para os arquivos: 📄 -->
+					<p title="{{ entry.absolute }}">
+						{% if entry.file %} {{ '📄 ' }}
+						<a href="/file/{{ entry.absolute }}">{{ entry.name }}</a>
+						{% else %} {{ '📂 ' }}
+						<a href="/picker?path={{ entry.absolute }}">{{ entry.name }}</a>
+						{% endif %}
+					</p>
+					{% if entry.file %}
+					<form action="/reader">
+						<input type="hidden" name="file" value="{{ entry.absolute }}" />
+						<button>Selecionar arquivo</button>
+					</form>
+					{% else%}
+					<form action="/reader">
+						<input type="hidden" name="file" value="{{ entry.absolute }}" />
+						<button>Selecionar pasta</button>
+					</form>
+					{% endif %}
+				</div>
+				{% endfor %}
+			</div>
+		</main>
+	</body>
+</html>
