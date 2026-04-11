@@ -75,10 +75,7 @@
 						{% endif %}
 					</p>
 					{% if entry.file %}
-					<form action="/reader">
-						<input type="hidden" name="file" value="{{ entry.absolute }}" />
-						<button disabled>Selecionar arquivo</button>
-					</form>
+					<button onclick="window.location = '/unzip?file={{ entry.absolute }}'">Selecionar arquivo</button>
 					{% else%}
 					<form action="/reader">
 						<input type="hidden" name="file" value="{{ entry.absolute }}" />

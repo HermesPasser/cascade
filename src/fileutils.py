@@ -10,18 +10,20 @@ class Entry(TypedDict):
     file: bool
 
 
-def dir_entries(path: str) -> tuple[list[Entry], str]:
-    """Returns a tuple with the list of dir entries, and its parent"""
+def dir_entries(path: str, extensions: set[str]) -> tuple[list[Entry], str]:
+    """
+    Returns a tuple with the list of non-hidden dir entries, and its parent.
+    All files that not end with extensions in extensions param are ignored.
+    """
     filter = {".", ".."}
-
     files = []
+
     for f in os.listdir(path):
-        if f in filter:
+        if f in filter or f.startswith("."):
             continue
 
         full = os.path.join(path, f)
-
-        if f.startswith("."):
+        if os.path.isfile(full) and not any(f.endswith(e) for e in extensions):
             continue
 
         if os.path.isfile(full) or os.path.isdir(full):
