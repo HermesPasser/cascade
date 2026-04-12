@@ -49,11 +49,13 @@
 		<div id="imageWrapper" class="image-wrapper"></div>
 
 		<div class="controls">
+			<button onclick="previousImage(event)">&lt;</button>
 			<select id="pageSelector" onchange="changePageFromSelector()">
 				{% for i in pages %}
 				<option id="option-img-{{ loop.index }}">{{ loop.index }}</option>
 				{% endfor %}
 			</select>
+			<button onclick="nextImage(event)">&gt;</button>
 			<button onclick="padding()">add padding</button>
 			<button onclick="longstrip()">longstrip mode</button>
 			<button onclick="manga()">manga mode</button>
@@ -128,6 +130,10 @@
 				pageSelector.value = index + 1;
 			}
 
+			function previousImage() {
+				changePage(index - 1);
+			}
+
 			function nextImage() {
 				changePage(index + 1);
 			}
@@ -137,7 +143,7 @@
 			}
 
 			function changePage(newIndex) {
-				if (newIndex >= images.length) {
+				if (newIndex < 1 || newIndex >= images.length) {
 					newIndex = 0;
 				}
 
