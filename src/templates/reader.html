@@ -48,7 +48,7 @@
 	</head>
 
 	<body>
-		<div id="imageWrapper" class="image-wrapper"></div>
+		<div id="imageWrapper" class="image-wrapper" onclick="handleClick(event)"></div>
 
 		<div class="controls">
 			<button onclick="previousImage(event)">&lt;</button>
@@ -99,7 +99,6 @@
 						img.src = image;
 						img.setAttribute("data-img-index", i.toString());
 						// Maybe add the option for lerping to the next image instead of jumping
-						img.addEventListener("click", nextImage);
 						imageWrapper.appendChild(img);
 
 						if (i === index) {
@@ -124,8 +123,22 @@
 					const img = document.createElement("img");
 					img.src = images[index] ?? images[0];
 					img.setAttribute("data-img-index", "0");
-					img.addEventListener("click", nextImage);
 					imageWrapper.appendChild(img);
+				}
+			}
+
+			function handleClick(event) {
+				// Would be nice if this was changed to clicking top/bottom on longstrip mode
+				// TODO: later configure if 'left' click should go back or if clicking should go always to the next
+				const rect = event.target.getBoundingClientRect();
+				const x = event.clientX - rect.left;
+				const w = rect.width;
+				if (x < w / 3) {
+					previousImage();
+				} else if (x < (2 * w) / 3) {
+					nextImage(); // TODO: use this to open the collapsible sidebar when i implement it
+				} else {
+					nextImage();
 				}
 			}
 
