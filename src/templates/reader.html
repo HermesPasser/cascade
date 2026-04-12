@@ -6,10 +6,12 @@
 			:root {
 				--img-margin: auto;
 				--direction: column;
+				--background: white;
 			}
 
 			body {
 				flex-direction: column;
+				background-color: var(--background);
 			}
 
 			.image-wrapper {
@@ -59,6 +61,7 @@
 			<button onclick="padding()">add padding</button>
 			<button onclick="longstrip()">longstrip mode</button>
 			<button onclick="manga()">manga mode</button>
+			<input onchange="root.style.setProperty('--background', event.target.value)" type="color" />
 		</div>
 
 		<script id="imagesJson" type="application/json">
