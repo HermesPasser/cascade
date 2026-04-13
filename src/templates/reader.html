@@ -5,21 +5,27 @@
 		<style>
 			:root {
 				--img-margin: auto;
-				--direction: column;
+				--direction: column; /* so i can change to columns if i ever implemnte double page*/
 				--background: white;
 			}
 
 			body {
-				flex-direction: column;
+				display: flex;
+				flex-direction: row;
 				background-color: var(--background);
 			}
 
+			/* TODO: não consigo colocar o scroll nisso no lugar do body para o
+			control não descer junto com o scroll gerado pelas imagens */
 			.image-wrapper {
 				display: flex;
 				flex-direction: var(--direction);
 				justify-content: space-around;
+				background-color: blue;
+				width: 100%;
 
 				img {
+					width: 100%;
 					/* auto or zero to no margin in longstrip */
 					margin-bottom: var(--img-margin);
 
@@ -27,12 +33,88 @@
                     height: fit-content;
                     inline-size: fit-content;
                     block-size: fit-content; */
+
+					/* max-width: 100%;
+					max-height: 100%;
+					object-fit: contain;
+					display: block; */
 				}
 			}
 
+			.controls.closed {
+				transform: translateX(260px);
+			}
+
 			.controls {
+				display: flex;
+				flex-direction: column;
+				box-shadow: 20px 0 2px -20px gray inset;
+				background: var(--background);
+				max-height: calc(100vh - 32px);
+				overflow: auto;
+				transform: translateX(0px);
+				transition: 0.5s;
+				gap: 0.2rem;
+				padding: 1rem 1rem;
+
 				position: fixed;
 				bottom: 0;
+				right: 0;
+				top: 0;
+
+				.control-input {
+					padding: 10px 8px;
+					border-radius: 6px;
+					box-shadow: none;
+
+					&:not(:hover):not(:active):not(:focus) {
+						border: 1px solid #e0e0e0;
+					}
+				}
+
+				.controls-close-wrapper {
+					display: flex;
+					align-items: flex-start;
+					flex-direction: column;
+					margin-bottom: 1rem;
+
+					button {
+						border: none;
+						border-radius: 50%;
+						padding: 1rem 1rem;
+
+						&:not(:hover):not(:active):not(:focus) {
+							box-shadow: none;
+							background: unset;
+						}
+					}
+				}
+
+				.bg-color-button {
+					display: flex;
+					align-items: center;
+					justify-content: center;
+
+					input {
+						border: none;
+						box-shadow: none;
+						appearance: none;
+						padding: 0;
+					}
+				}
+
+				div {
+					display: flex;
+					justify-content: space-around;
+					/* background-color: pink; */
+
+					select {
+						width: 40%;
+					}
+					button {
+						width: auto;
+					}
+				}
 			}
 
 			@media only screen and (max-width: 1000px) {
@@ -50,18 +132,33 @@
 	<body>
 		<div id="imageWrapper" class="image-wrapper" onclick="handleClick(event)"></div>
 
-		<div class="controls">
-			<button onclick="previousImage(event)">&lt;</button>
-			<select id="pageSelector" onchange="changePageFromSelector()">
-				{% for i in pages %}
-				<option id="option-img-{{ loop.index }}">{{ loop.index }}</option>
-				{% endfor %}
-			</select>
-			<button onclick="nextImage(event)">&gt;</button>
-			<button onclick="padding()">add padding</button>
-			<button onclick="longstrip()">longstrip mode</button>
-			<button onclick="manga()">manga mode</button>
-			<input onchange="root.style.setProperty('--background', event.target.value)" type="color" />
+		<div id="controls" class="controls">
+			<div class="controls-close-wrapper">
+				<button onclick="controls.classList.toggle('closed')">X</button>
+			</div>
+			<div class="controls-inner">
+				<button onclick="previousImage(event)" class="control-input">&lt;</button>
+				<select id="pageSelector" onchange="changePageFromSelector()" class="control-input">
+					{% for i in pages %}
+					<option id="option-img-{{ loop.index }}">{{ loop.index }}</option>
+					{% endfor %}
+				</select>
+				<button onclick="nextImage(event)" class="control-input">&gt;</button>
+			</div>
+			<!-- TODO: portugues por consistência -->
+			<button onclick="padding()" class="control-input">add padding</button>
+			<button onclick="longstrip()" class="control-input">longstrip mode</button>
+			<button onclick="manga()" class="control-input">manga mode</button>
+
+			<button onclick="colorInput.click()" class="bg-color-button control-input">
+				background
+				<input
+					id="colorInput"
+					class="sex"
+					onchange="root.style.setProperty('--background', event.target.value)"
+					type="color"
+				/>
+			</button>
 		</div>
 
 		<script id="imagesJson" type="application/json">
@@ -136,7 +233,7 @@
 				if (x < w / 3) {
 					previousImage();
 				} else if (x < (2 * w) / 3) {
-					nextImage(); // TODO: use this to open the collapsible sidebar when i implement it
+					controls.classList.toggle("closed");
 				} else {
 					nextImage();
 				}
