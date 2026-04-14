@@ -1,0 +1,87 @@
+.image-wrapper {
+	display: flex;
+	flex-direction: var(--direction);
+	justify-content: space-around;
+	width: 100%;
+
+	img {
+		/* auto or zero to no margin in longstrip */
+		margin-bottom: var(--img-margin);
+	}
+}
+
+.fit-width {
+	height: 100%;
+	width: 100%;
+	object-fit: contain;
+}
+
+.stretch-width {
+	img {
+		height: 100%;
+		width: 100%;
+		object-fit: contain;
+	}
+}
+
+.fit-height {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	width: 100%;
+	height: 100vh;
+	overflow: hidden;
+
+	img {
+		display: block;
+		height: 100%;
+		width: auto;
+		max-width: 100%;
+		object-fit: contain;
+		overflow-y: auto;
+	}
+}
+
+@media (max-width: 1000px) {
+	body {
+		margin: 0;
+		height: 100%;
+	}
+
+	.image-wrapper {
+		height: 100dvh;
+	}
+
+	.fit-width {
+		display: inline-block;
+		width: auto;
+
+		img {
+			margin: 0;
+			padding: 0;
+
+			height: 100%; /* This make the image 'centered'. Make sure if this does not broke for images with larger heights */
+			width: 100%;
+			object-fit: contain;
+		}
+	}
+
+	.fit-height {
+		display: inline-block;
+		touch-action: pan-x;
+		overflow-x: auto;
+		zoom: 1;
+
+		img {
+			height: 100%;
+			max-width: none;
+
+			/* No apparent effect
+            display: block;
+            margin: 0;
+            width: auto;
+            object-fit: cover;
+            box-sizing: content-box; */
+		}
+	}
+}
