@@ -21,7 +21,6 @@
 				display: flex;
 				flex-direction: var(--direction);
 				justify-content: space-around;
-				background-color: blue;
 				width: 100%;
 
 				img {
@@ -106,7 +105,6 @@
 				div {
 					display: flex;
 					justify-content: space-around;
-					/* background-color: pink; */
 
 					select {
 						width: 40%;
@@ -147,8 +145,7 @@
 			</div>
 			<!-- TODO: portugues por consistência -->
 			<button onclick="padding()" class="control-input">add padding</button>
-			<button onclick="longstrip()" class="control-input">longstrip mode</button>
-			<button onclick="manga()" class="control-input">manga mode</button>
+			<button id="modeButton" onclick="toogleMode()" class="control-input">Mode: Long Strip</button>
 
 			<button onclick="colorInput.click()" class="bg-color-button control-input">
 				background
@@ -171,7 +168,7 @@
 			// TODO: dark mode
 
 			const DISPLAY_MODE = Object.freeze({
-				LONG_SPREAD: "longspead",
+				LONG_STRIP: "longstrip",
 				SINGLE_PAGE: "singlepage"
 			});
 
@@ -189,7 +186,7 @@
 				mode = newMode;
 				let maybeImgToScroolTo = null;
 				imageWrapper.querySelectorAll("*").forEach((e) => e.remove());
-				if (mode === DISPLAY_MODE.LONG_SPREAD) {
+				if (mode === DISPLAY_MODE.LONG_STRIP) {
 					layoutLongstrip();
 					images.forEach((image, i) => {
 						const img = document.createElement("img");
@@ -221,6 +218,16 @@
 					img.src = images[index] ?? images[0];
 					img.setAttribute("data-img-index", "0");
 					imageWrapper.appendChild(img);
+				}
+			}
+
+			function toogleMode() {
+				if (mode === DISPLAY_MODE.LONG_STRIP) {
+					manga();
+					modeButton.innerText = "Mode: Single page"
+				} else {
+					modeButton.innerText = "Mode: Long Strip"
+					longstrip();
 				}
 			}
 
@@ -270,7 +277,7 @@
 					// On single page mode we scroll back to the top when the image is replaced by the next
 					// TODO: make configurable
 					imageWrapper.scrollIntoView({ behavior: "smooth" });
-				} else if (mode === DISPLAY_MODE.LONG_SPREAD) {
+				} else if (mode === DISPLAY_MODE.LONG_STRIP) {
 					// TODO: this can make the scroll go backwards if the user is
 					//       "between" two pages. To fix we need to get the index
 					//       from the image that the user actually clicked
@@ -295,7 +302,7 @@
 			}
 
 			function longstrip() {
-				display(DISPLAY_MODE.LONG_SPREAD);
+				display(DISPLAY_MODE.LONG_STRIP);
 			}
 
 			function layoutManga() {
