@@ -15,6 +15,11 @@
 				background-color: var(--background);
 			}
 
+			body:fullscreen {
+				background-color: red;
+				overflow: auto;
+			}
+
 			.controls.closed {
 				transform: translateX(260px);
 			}
@@ -123,6 +128,7 @@
 			<button onclick="padding()" class="control-input">add padding</button>
 			<button id="modeButton" onclick="toogleMode()" class="control-input">Mode: Long Strip</button>
 			<button id="sizeButton" onclick="toogleSize()" class="control-input">Size:</button>
+			<button id="fullscreenButton" onclick="fullscreen()">Fullscreen: Disabled</button>
 
 			<button onclick="colorInput.click()" class="bg-color-button control-input">
 				background
@@ -226,6 +232,16 @@
 				currentSizeMode = sizeMode;
 				imageWrapper.className = "image-wrapper " + currentSizeMode.value;
 				sizeButton.innerText = "Size: " + currentSizeMode.text;
+			}
+
+			function fullscreen() {
+				if (document.fullscreenElement) {
+					document.exitFullscreen();
+					fullscreenButton.innerText = "Fullscreen: Disabled";
+				} else {
+					document.body.requestFullscreen();
+					fullscreenButton.innerText = "Fullscreen: Enabled";
+				}
 			}
 
 			function handleClick(event) {
