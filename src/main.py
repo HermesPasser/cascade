@@ -1,4 +1,5 @@
 from pathlib import Path
+import secrets
 
 import flask
 
@@ -6,6 +7,15 @@ from fileutils import dir_entries, list_images_from_folder
 from unzip import unzip_file
 
 app = flask.Flask(__name__)
+app.secret_key = secrets.SystemRandom().randbytes(100000)
+
+
+@app.errorhandler(FileNotFoundError)
+@app.errorhandler(ValueError)
+def not_found(e):
+    message = e.filename if isinstance(e, FileNotFoundError) else e
+    flask.flash(f"Not found: {message}")
+    return flask.redirect("/")
 
 
 # TODO: make reader read files (rar, etc)
