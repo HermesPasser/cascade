@@ -1,7 +1,7 @@
 <!doctype html>
 <html>
 	<head>
-		<title>Reader</title>
+		<title>Reader - {{ current.split('/') | last }}</title>
 		<style>
 			:root {
 				--img-margin: auto;
@@ -82,13 +82,14 @@
 					}
 				}
 
-				div {
+				.controls-navigator {
 					display: flex;
 					justify-content: space-around;
-
+					gap: .5rem;
 					select {
-						width: 40%;
+						width: 10rem;
 					}
+
 					button {
 						width: auto;
 					}
@@ -115,7 +116,7 @@
 			<div class="controls-close-wrapper">
 				<button onclick="controls.classList.toggle('closed')">X</button>
 			</div>
-			<div class="controls-inner">
+			<div class="controls-navigator">
 				<button onclick="previousImage(event)" class="control-input">&lt;</button>
 				<select id="pageSelector" onchange="changePageFromSelector()" class="control-input">
 					{% for i in pages %}
@@ -124,12 +125,23 @@
 				</select>
 				<button onclick="nextImage(event)" class="control-input">&gt;</button>
 			</div>
+			<div class="controls-navigator">
+				<button onclick="previousEntry()" class="control-input">&lt;</button>
+				 <!-- TODO: prev and next need to be relative to the 'current'. Pass from python or edit via js -->
+				<select id="entrySelector" onchange="changeEntry(event.target.value)" class="control-input">
+					{% for entry in entries %}
+					<option {{ "selected" if current == entry.absolute else "" }} value="{{ entry.absolute }}">
+						{{ entry.name }}
+					</option>
+					{% endfor %}
+				</select>
+				<button onclick="nextEntry()"class="control-input">&gt;</button>
+			</div>
 			<!-- TODO: portugues por consistência -->
 			<button onclick="padding()" class="control-input">add padding</button>
 			<button id="modeButton" onclick="toogleMode()" class="control-input">Mode: Long Strip</button>
 			<button id="sizeButton" onclick="toogleSize()" class="control-input">Size:</button>
 			<button id="fullscreenButton" onclick="fullscreen()">Fullscreen: Disabled</button>
-
 			<button onclick="colorInput.click()" class="bg-color-button control-input">
 				background
 				<input
@@ -257,6 +269,28 @@
 				} else {
 					nextImage();
 				}
+			}
+
+			function previousEntry() {
+				const current  = "{{ current }}"
+				const currentEl = Array.from(entrySelector.getElementsByTagName('option')).find(o => o.value === current)
+
+				if (currentEl.previousElementSibling) {
+					changeEntry(currentEl.previousElementSibling.value)
+				}
+			}
+
+			function nextEntry() {
+				const current  = "{{ current }}"
+				const currentEl = Array.from(entrySelector.getElementsByTagName('option')).find(o => o.value === current)
+
+				if (currentEl.nextElementSibling) {
+					changeEntry(currentEl.nextElementSibling.value)
+				}
+			}
+
+			function changeEntry(entry) {
+				window.location.replace("/unzip?file=" + entry)
 			}
 
 			function updateSelector() {

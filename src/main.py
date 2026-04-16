@@ -6,6 +6,7 @@ import flask
 from fileutils import dir_entries, list_images_from_folder
 from unzip import unzip_file
 
+SUPPORTED_FILES = {".zip", ".cbz", "epub"}
 app = flask.Flask(__name__)
 app.secret_key = secrets.SystemRandom().randbytes(100000)
 
@@ -27,7 +28,7 @@ def home():
 @app.get("/picker")
 def index():
     path = flask.request.args.get("path", str(Path.home()), type=str)
-    entries, prev = dir_entries(path, {".zip", ".cbz", "epub"})
+    entries, prev = dir_entries(path, SUPPORTED_FILES)
     return flask.render_template(
         "picker.html", entries=entries, current=path, prev=prev
     )
@@ -46,8 +47,15 @@ def unzip():
     if not file:
         return flask.redirect("/picker")
 
-    decompressed_path = unzip_file(file)
-    return flask.redirect("/reader?file=" + decompressed_path)
+    if Path(file).is_dir():
+        # Already a directory, nothing to decompress
+        descompressed_path = file
+    else:
+        descompressed_path = unzip_file(file)
+
+    return flask.redirect(
+        "/reader?file=" + descompressed_path + "&orignal_path=" + file
+    )
 
 
 @app.get("/reader")
@@ -57,7 +65,16 @@ def reader():
         return flask.redirect("/picker")
 
     pages = ["/file" + img for img in list_images_from_folder(folder)]
-    return flask.render_template("reader.html", pages=pages)
+
+    # TODO: maybe we should check if the entries contain any *files*
+    # We get the original path since we open files on a temp folder but we
+    # want to show the directory from the original file.
+    og_path = flask.request.args.get("orignal_path", folder, type=str)
+    entries, _ = dir_entries(str(Path(og_path).parent), SUPPORTED_FILES)
+
+    return flask.render_template(
+        "reader.html", pages=pages, entries=entries, current=og_path
+    )
 
 
 app.run("0.0.0.0", debug=True)
