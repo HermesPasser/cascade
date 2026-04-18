@@ -64,12 +64,18 @@ def reader():
     if not folder:
         return flask.redirect("/picker")
 
-    pages = ["/file" + img for img in list_images_from_folder(folder)]
-
     # TODO: maybe we should check if the entries contain any *files*
     # We get the original path since we open files on a temp folder but we
     # want to show the directory from the original file.
     og_path = flask.request.args.get("orignal_path", folder, type=str)
+
+    # Re-uncompress the zip if the user bookmark the link and the temp folder is gone
+    if not Path(folder).exists() and og_path:
+        return flask.redirect(
+            f"/unzip?file={og_path}&page=" + flask.request.args.get("page", "")
+        )
+
+    pages = ["/file" + img for img in list_images_from_folder(folder)]
     entries, _ = dir_entries(str(Path(og_path).parent), SUPPORTED_FILES)
 
     return flask.render_template(
