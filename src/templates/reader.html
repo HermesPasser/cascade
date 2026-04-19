@@ -41,6 +41,13 @@
 				right: 0;
 				top: 0;
 
+				span {
+					text-align: center;
+					a {
+						text-decoration: none;
+					}
+				}
+
 				.control-input {
 					padding: 10px 8px;
 					border-radius: 6px;
@@ -116,6 +123,9 @@
 			<div class="controls-close-wrapper">
 				<button onclick="controls.classList.toggle('closed')">X</button>
 			</div>
+			<span>
+				<a href="/picker?path={{ parent }}">↖️</a> {{ current.split('/') | last }}
+			</span>
 			<div class="controls-navigator">
 				<button onclick="previousImage(event)" class="control-input">&lt;</button>
 				<select id="pageSelector" onchange="changePageFromSelector()" class="control-input">
@@ -159,7 +169,6 @@
 		<script>
 			"use strict";
 
-			// TODO: content fit options
 			// TODO: dark mode
 
 			const DISPLAY_MODE = Object.freeze({

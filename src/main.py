@@ -92,10 +92,11 @@ def reader():
         )
 
     pages = ["/file" + img for img in list_images_from_folder(folder)]
-    entries, _ = dir_entries(str(Path(og_path).parent), SUPPORTED_FILES)
+    parent = str(Path(og_path).parent)
+    entries, _ = dir_entries(parent, SUPPORTED_FILES)
 
     return flask.render_template(
-        "reader.html", pages=pages, entries=entries, current=og_path
+        "reader.html", pages=pages, entries=entries, current=og_path, parent=parent
     )
 
 
