@@ -3,7 +3,7 @@
 	<head>
 		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
 		<meta charset="utf-8" />
-		<title>Lista de arquivos</title>
+		<title>File list</title>
 		<style>
 			body {
 				background-color: gray;
@@ -19,6 +19,20 @@
 				padding: 10px;
 				width: 70%;
 				height: 80%;
+			}
+
+			.header {
+				div {
+					display: flex;
+					justify-content: space-between;
+					p {
+						margin: 0;
+						padding: 0;
+					}
+					#note {
+						font-size: small;
+					}
+				}
 			}
 
 			h1 {
@@ -38,13 +52,20 @@
 				.item:nth-child(odd) {
 					background-color: rgb(90, 103, 116);
 				}
+				.drag-text {
+					display: none;
+				}
 			}
 
 			.item {
 				display: grid;
 				grid-template-columns: auto 5rem;
-				justify-items: flex-start;
+				justify-content: space-between;
 				align-items: center;
+
+				button {
+					width: 5rem;
+				}
 			}
 
 			.item p {
@@ -53,6 +74,21 @@
 				text-overflow: ellipsis;
 				white-space: nowrap;
 				color: cyan;
+			}
+
+			.active {
+				display: flex;
+				align-items: center;
+				justify-content: center;
+				border: 2px dotted black;
+				overflow: hidden;
+				.item {
+					display: none;
+				}
+				.drag-text {
+					display: block;
+					font-size: x-large;
+				}
 			}
 
 			@media only screen and (max-width: 600px) {
@@ -73,7 +109,7 @@
 				.item-list {
 					height: auto;
 				}
-				
+
 				.item {
 					display: flex;
 
@@ -85,7 +121,7 @@
 
 				.item p {
 					margin: 0;
-					flex: 1 1 auto;
+					flex: 1 1;
 					min-width: 0;
 					overflow: hidden;
 					white-space: normal;
@@ -97,21 +133,23 @@
 
 	<body>
 		<main>
-			{% with messages = get_flashed_messages(with_categories=true) %}
-			{% if messages %}
-				<ul class=flashes>
+			{% with messages = get_flashed_messages(with_categories=true) %} {% if messages %}
+			<ul class="flashes">
 				{% for category, message in messages %}
 				<li class="{{ category }}">{{ message }}</li>
 				{% endfor %}
-				</ul>
-			{% endif %}
-			{% endwith %}
+			</ul>
+			{% endif %} {% endwith %}
 
 			<div class="header">
-				<h1>Indice de {{ current }}</h1>
-				<p><a href="/picker?path={{ prev }}">{{ prev }}</a> (parent)</p>
+				<h1>Index of {{ current }}</h1>
+				<div>
+					<p><a href="/picker?path={{ prev }}">{{ prev }}</a> (parent)</p>
+					<p id="note">Drag and drop or select a folder or file below</p>
+				</div>
 			</div>
-			<div class="item-list">
+			<div id="dragArea" class="item-list">
+				<p class="drag-text">Drop files or folders</p>
 				{% for entry in entries %}
 				<div class="item">
 					<!-- para os arquivos: 📄 -->
@@ -123,16 +161,77 @@
 						{% endif %}
 					</p>
 					{% if entry.file %}
-					<button onclick="window.location = '/unzip?file={{ entry.absolute }}'">Selecionar arquivo</button>
+					<button onclick="window.location = '/unzip?file={{ entry.absolute }}'">Select</button>
 					{% else%}
 					<form action="/reader">
 						<input type="hidden" name="file" value="{{ entry.absolute }}" />
-						<button>Selecionar pasta</button>
+						<button>Select</button>
 					</form>
 					{% endif %}
 				</div>
 				{% endfor %}
 			</div>
 		</main>
+		<script>
+			window.onload = () => {
+				if ("showOpenFilePicker" in window) {
+					dragArea.addEventListener("drop", onDrop);
+
+					dragArea.addEventListener("dragenter", (event) => {
+						console.log("enter");
+						dragArea.classList.add("active");
+					});
+
+					dragArea.addEventListener("dragleave", (event) => {
+						if (event.target === dragArea) {
+							dragArea.classList.remove("active");
+						}
+					});
+
+					dragArea.addEventListener("dragover", (event) => {
+						event.preventDefault();
+					});
+				} else {
+					note.innerText =
+						"Select a folder or file below (drag and drop disable since your browser does not fully support the file system API)";
+				}
+			};
+
+			async function addHandleContentsToForm(handle, form) {
+				if (handle.kind === "file") {
+					form.append(name, await handle.getFile());
+					return;
+				}
+
+				for await (const [name, childHandle] of handle.entries()) {
+					if (childHandle.kind === "directory") {
+						await addHandleContentsToForm(childHandle, form);
+					} else {
+						form.append(name, await childHandle.getFile());
+					}
+				}
+			}
+
+			async function onDrop(event) {
+				event.preventDefault();
+				const form = new FormData();
+				const entries = [...event.dataTransfer.items];
+
+				for (const entry of entries) {
+					const handle = await entry.getAsFileSystemHandle();
+					await addHandleContentsToForm(handle, form);
+				}
+
+				if (Array.from(form.entries()).length === 0) {
+					alert("No files given");
+					return;
+				}
+
+				dragArea.classList.remove("active"); // Reset state for case when user pop the history back to this page
+				fetch("/paste", { method: "POST", body: form })
+					.then((r) => (window.location.href = r.url))
+					.catch(alert);
+			}
+		</script>
 	</body>
 </html>

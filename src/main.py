@@ -3,7 +3,7 @@ import secrets
 
 import flask
 
-from fileutils import dir_entries, list_images_from_folder
+from fileutils import dir_entries, list_images_from_folder, save_to_temp_folder
 from unzip import unzip_file
 
 SUPPORTED_FILES = {".zip", ".cbz", "epub"}
@@ -23,6 +23,19 @@ def not_found(e):
 @app.get("/")
 def home():
     return flask.redirect("/picker")
+
+
+@app.route("/paste", methods=("GET", "POST"))
+def paste():
+    if flask.request.method == "GET":
+        return flask.render_template("/paste.html")
+
+    files = list(flask.request.files.values())
+    if not files:
+        return "No files given", 400
+
+    folder = save_to_temp_folder(files)
+    return flask.redirect(f"/reader?file={folder}&orignal_path={Path.home()}")
 
 
 @app.get("/picker")
@@ -45,6 +58,7 @@ def file(file: str):
 def unzip():
     file = flask.request.args.get("file", type=str)
     if not file:
+        flask.flash("No file provided")
         return flask.redirect("/picker")
 
     if Path(file).is_dir():
@@ -62,6 +76,7 @@ def unzip():
 def reader():
     folder = flask.request.args.get("file", type=str)
     if not folder:
+        flask.flash("No folder provided")
         return flask.redirect("/picker")
 
     # TODO: maybe we should check if the entries contain any *files*
@@ -71,6 +86,7 @@ def reader():
 
     # Re-uncompress the zip if the user bookmark the link and the temp folder is gone
     if not Path(folder).exists() and og_path:
+        flask.flash("Neither temp folder nor original folder exists")
         return flask.redirect(
             f"/unzip?file={og_path}&page=" + flask.request.args.get("page", "")
         )

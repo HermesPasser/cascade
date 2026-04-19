@@ -1,7 +1,8 @@
 from itertools import chain
 import os
 from pathlib import Path
-from typing import TypedDict
+import tempfile
+from typing import Protocol, Sequence, TypedDict
 
 
 class Entry(TypedDict):
@@ -53,3 +54,21 @@ def list_images_from_folder(folder: str):
     images = [str(file) for file in it]
     images.sort()
     return images
+
+
+class Savable(Protocol):
+    @property
+    def filename(self) -> str | None: ...
+    def save(self, dst: os.PathLike[str]): ...
+
+
+def save_to_temp_folder(files: Sequence[Savable]):
+    directory = Path(tempfile.mkdtemp())
+    size = len(files)
+
+    for i, file in enumerate(files, start=1):
+        name = str(i).zfill(len(str(size)))
+        name += "-" + file.filename if file.filename else ""
+        file.save(directory / name)
+
+    return str(directory)
