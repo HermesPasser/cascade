@@ -101,6 +101,24 @@
 				}
 			}
 
+			.thumb-area {
+				position: absolute;
+				top: 50%;
+				left: 50%;
+				transform: translate(-50%, -50%);
+				z-index: 2;
+				width: 30rem;
+				pointer-events: none;
+
+				img {
+					display: flex;
+					margin: auto;
+					justify-self: center;
+					max-width: 50%;
+					max-height: 50%;
+				}
+			}
+
 			@media only screen and (max-width: 600px) {
 				:root,
 				body {
@@ -170,8 +188,11 @@
 				<p class="drag-text">Drop files or folders</p>
 				{% for entry in entries %}
 				<div class="item" data-filename="{{ entry.name }}">
-					<!-- para os arquivos: 📄 -->
-					<p title="{{ entry.absolute }}">
+					<p
+						title="{{ entry.absolute }}"
+						onmouseenter="updateThumbnail(event, `{{ entry.thumbnail }}`)"
+						onmouseleave="globalThumbnail.style.display = 'none'"
+					>
 						{% if entry.file %} {{ '📄 ' }}
 						<a href="/file/{{ entry.absolute }}">{{ entry.name }}</a>
 						{% else %} {{ '📂 ' }}
@@ -188,6 +209,9 @@
 					{% endif %}
 				</div>
 				{% endfor %}
+				<div id="globalThumbnail" class="thumb-area" style="display: none">
+					<img id="globalThumbnailImage" onerror="console.log" />
+				</div>
 			</div>
 		</main>
 		<script>
@@ -255,6 +279,13 @@
 				fetch("/paste", { method: "POST", body: form })
 					.then((r) => (window.location.href = r.url))
 					.catch(alert);
+			}
+
+			function updateThumbnail(event, thumb) {
+				if (thumb) {
+					globalThumbnail.style.display = "";
+					globalThumbnailImage.src = "/file/" + thumb;
+				}
 			}
 
 			let timer = null;
