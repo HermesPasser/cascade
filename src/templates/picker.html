@@ -3,7 +3,7 @@
 	<head>
 		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
 		<meta charset="utf-8" />
-		<title>File list</title>
+		<title>File list - {{ current.split('/')|last }}</title>
 		<style>
 			body {
 				background-color: gray;
@@ -22,6 +22,11 @@
 			}
 
 			.header {
+				div:first-child {
+					display: flex;
+					align-items: center;
+				}
+
 				div {
 					display: flex;
 					justify-content: space-between;
@@ -32,6 +37,11 @@
 					#note {
 						font-size: small;
 					}
+				}
+				input {
+					display: flex;
+					justify-self: center;
+					height: 10%;
 				}
 			}
 
@@ -142,7 +152,15 @@
 			{% endif %} {% endwith %}
 
 			<div class="header">
-				<h1>Index of {{ current }}</h1>
+				<div>
+					<h1>Index of {{ current.split('/')|last }}</h1>
+					<input
+						id="search"
+						type="text"
+						placeholder="search title (hotkey: /)"
+						oninput="debounce(filter)(event)"
+					/>
+				</div>
 				<div>
 					<p><a href="/picker?path={{ prev }}">{{ prev }}</a> (parent)</p>
 					<p id="note">Drag and drop or select a folder or file below</p>
@@ -151,7 +169,7 @@
 			<div id="dragArea" class="item-list">
 				<p class="drag-text">Drop files or folders</p>
 				{% for entry in entries %}
-				<div class="item">
+				<div class="item" data-filename="{{ entry.name }}">
 					<!-- para os arquivos: 📄 -->
 					<p title="{{ entry.absolute }}">
 						{% if entry.file %} {{ '📄 ' }}
@@ -178,7 +196,6 @@
 					dragArea.addEventListener("drop", onDrop);
 
 					dragArea.addEventListener("dragenter", (event) => {
-						console.log("enter");
 						dragArea.classList.add("active");
 					});
 
@@ -195,6 +212,13 @@
 					note.innerText =
 						"Select a folder or file below (drag and drop disable since your browser does not fully support the file system API)";
 				}
+
+				document.addEventListener("keydown", (e) => {
+					if (e.key === "/" && !search.activeElement) {
+						e.preventDefault();
+						search.focus();
+					}
+				});
 			};
 
 			async function addHandleContentsToForm(handle, form) {
@@ -231,6 +255,22 @@
 				fetch("/paste", { method: "POST", body: form })
 					.then((r) => (window.location.href = r.url))
 					.catch(alert);
+			}
+
+			let timer = null;
+			function debounce(fn, wait = 500) {
+				return function (...args) {
+					clearTimeout(timer);
+					timer = setTimeout(() => fn.apply(this, args), wait);
+				};
+			}
+
+			function filter(event) {
+				const filter = event.target.value.trim().toLowerCase();
+				for (const div of document.querySelectorAll("[data-filename]")) {
+					const shouldShow = div.attributes["data-filename"].value.toLowerCase().includes(filter);
+					div.style.display = shouldShow ? "" : "none";
+				}
 			}
 		</script>
 	</body>
