@@ -149,7 +149,7 @@
 			</div>
 			<!-- TODO: portugues por consistência -->
 			<button onclick="padding()" class="control-input">add padding</button>
-			<button id="modeButton" onclick="toogleMode()" class="control-input">Mode: Long Strip</button>
+			<button id="modeButton" onclick="toogleMode()" class="control-input">Mode: Singe Page</button>
 			<button id="sizeButton" onclick="toogleSize()" class="control-input">Size:</button>
 			<button id="fullscreenButton" onclick="fullscreen()">Fullscreen: Disabled</button>
 			<button onclick="colorInput.click()" class="bg-color-button control-input">
@@ -177,7 +177,7 @@
 			});
 
 			const SIZE_MODE = Object.freeze({
-				FIT_WIDTH: { value: "longstrip", text: "Fit Width"},
+				FIT_WIDTH: { value: "fit-width", text: "Fit Width"},
 				FIT_HEIGHT: { value: "fit-height", text: "Fit Height"},
 				STRETCH_WIDTH: { value: "stretch-width", text: "Stretch Width"},
 			});
@@ -236,7 +236,7 @@
 			function toogleMode() {
 				if (mode === DISPLAY_MODE.LONG_STRIP) {
 					manga();
-					modeButton.innerText = "Mode: Single page";
+					modeButton.innerText = "Mode: Single Page";
 				} else {
 					modeButton.innerText = "Mode: Long Strip";
 					longstrip();
