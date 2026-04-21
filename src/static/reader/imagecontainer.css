@@ -11,9 +11,12 @@
 }
 
 .fit-width {
-	height: 100%;
 	width: 100%;
 	object-fit: contain;
+	img {
+		width: auto;
+		max-width: 100%;
+	}
 }
 
 .stretch-width {
