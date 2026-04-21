@@ -35,6 +35,17 @@ def paste():
         return "No files given", 400
 
     folder = save_to_temp_folder(files)
+
+    # In case of the user having dragged an archive, then pass the archive's path
+    # to the unzip route instead of opening the containing temp folder
+    if (
+        files
+        and files[0].filename
+        and any(True for e in SUPPORTED_FILES if files[0].filename.endswith(e))
+    ):
+        folder = next(Path(folder).iterdir())
+        return flask.redirect(f"/unzip?file={folder}")
+
     return flask.redirect(f"/reader?file={folder}&orignal_path={Path.home()}")
 
 
