@@ -6,7 +6,8 @@ from typing import Protocol, Sequence, TypedDict
 
 from unzip import get_first_file
 
-SUPPORTED_FILE_EXTENSIONS = ("png", "jpeg", "jpg", "gif", "webp")
+SUPPORTED_IMAGE_EXTENSIONS = ("png", "jpeg", "jpg", "gif", "webp")
+SUPPORTED_ARCHIVE_EXTENSIONS = {"zip", "cbz", "epub"}
 
 
 class Entry(TypedDict):
@@ -16,7 +17,9 @@ class Entry(TypedDict):
     thumbnail: str
 
 
-def dir_entries(path: str, extensions: set[str]) -> tuple[list[Entry], str]:
+def dir_entries(
+    path: str, extensions: set[str] = SUPPORTED_ARCHIVE_EXTENSIONS
+) -> tuple[list[Entry], str]:
     """
     Returns a tuple with the list of non-hidden dir entries, and its parent.
     All files that not end with extensions in extensions param are ignored.
@@ -30,7 +33,7 @@ def dir_entries(path: str, extensions: set[str]) -> tuple[list[Entry], str]:
 
         full = os.path.join(path, f)
         is_file = os.path.isfile(full)
-        if is_file and not any(f.endswith(e) for e in extensions):
+        if is_file and not any(f.endswith(f".{e}") for e in extensions):
             continue
 
         if is_file or os.path.isdir(full):
@@ -49,7 +52,7 @@ def _get_thumbnail(
     """This get the first image in the path that we find, not the _fist_ image"""
     full = Path(filename)
     filter_fn = lambda file: any(
-        file.lower().endswith(e) for e in SUPPORTED_FILE_EXTENSIONS
+        file.lower().endswith(e) for e in SUPPORTED_IMAGE_EXTENSIONS
     )
 
     # If the path is a file, then the file is an archive. Get the first image form it
@@ -77,7 +80,7 @@ def iterate_archives(path: Path):
     return chain(
         *(
             path.glob(f"**/*.{pat}", case_sensitive=False)
-            for pat in ("zip", "cbz", "epub")
+            for pat in SUPPORTED_ARCHIVE_EXTENSIONS
         )
     )
 
@@ -86,7 +89,7 @@ def iterate_images(path: Path):
     return chain(
         *(
             path.glob(f"**/*.{pat}", case_sensitive=False)
-            for pat in SUPPORTED_FILE_EXTENSIONS
+            for pat in SUPPORTED_IMAGE_EXTENSIONS
         )
     )
 

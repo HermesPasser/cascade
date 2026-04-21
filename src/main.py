@@ -3,10 +3,14 @@ import secrets
 
 import flask
 
-from fileutils import dir_entries, list_images_from_folder, save_to_temp_folder
+from fileutils import (
+    SUPPORTED_ARCHIVE_EXTENSIONS,
+    dir_entries,
+    list_images_from_folder,
+    save_to_temp_folder,
+)
 from unzip import unzip_file
 
-SUPPORTED_FILES = {".zip", ".cbz", "epub"}
 app = flask.Flask(__name__)
 app.secret_key = secrets.SystemRandom().randbytes(100000)
 
@@ -41,7 +45,11 @@ def paste():
     if (
         files
         and files[0].filename
-        and any(True for e in SUPPORTED_FILES if files[0].filename.endswith(e))
+        and any(
+            True
+            for e in SUPPORTED_ARCHIVE_EXTENSIONS
+            if files[0].filename.endswith(f".{e}")
+        )
     ):
         folder = next(Path(folder).iterdir())
         return flask.redirect(f"/unzip?file={folder}")
@@ -52,7 +60,7 @@ def paste():
 @app.get("/picker")
 def index():
     path = flask.request.args.get("path", str(Path.home()), type=str)
-    entries, prev = dir_entries(path, SUPPORTED_FILES)
+    entries, prev = dir_entries(path)
     return flask.render_template(
         "picker.html", entries=entries, current=path, prev=prev
     )
@@ -104,7 +112,7 @@ def reader():
 
     pages = ["/file" + img for img in list_images_from_folder(folder)]
     parent = str(Path(og_path).parent)
-    entries, _ = dir_entries(parent, SUPPORTED_FILES)
+    entries, _ = dir_entries(parent)
 
     return flask.render_template(
         "reader.html", pages=pages, entries=entries, current=og_path, parent=parent
