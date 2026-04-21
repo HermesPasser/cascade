@@ -30,6 +30,7 @@
 				box-shadow: 20px 0 2px -20px gray inset;
 				background: var(--background);
 				max-height: calc(100vh - 32px);
+				max-width: 10%;
 				overflow: auto;
 				transform: translateX(0px);
 				transition: 0.5s;
@@ -94,7 +95,7 @@
 					justify-content: space-around;
 					gap: .5rem;
 					select {
-						width: 10rem;
+						width: 100%;
 					}
 
 					button {
@@ -105,10 +106,15 @@
 
 			@media only screen and (max-width: 1000px) {
 				.controls {
+					width: 50%;
+					max-width: 50%;
+
+					span {
+						font-size: xx-large;
+					}
 					select,
 					button {
 						font-size: xx-large;
-						height: 5rem;
 					}
 				}
 			}
