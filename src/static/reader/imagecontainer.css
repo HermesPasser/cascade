@@ -10,6 +10,17 @@
 	}
 }
 
+.no-limit {
+	object-fit: none;
+
+	img {
+		width: auto;
+		height: auto;
+		max-width: none;
+		max-height: none;
+	}
+}
+
 .fit-width {
 	width: 100%;
 	object-fit: contain;
