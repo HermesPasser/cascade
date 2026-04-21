@@ -13,12 +13,15 @@
 			}
 
 			main {
+				display: flex;
+				flex-direction: column;
 				background-color: slategray;
 				border: 1px solid white;
 				margin: auto;
 				padding: 10px;
 				width: 70%;
-				height: 80%;
+				height: 80vh;
+				overflow: hidden;
 			}
 
 			.header {
@@ -53,7 +56,51 @@
 				}
 			}
 
-			.item-list {
+			.drag-text {
+				display: none;
+			}
+
+			.item-list.thumb:not(.drag-files-is-active) {
+				display: flex;
+				flex-flow: row wrap;
+				justify-content: flex-start;
+				max-height: 100%;
+				overflow: auto;
+				gap: 2rem;
+				padding-top: 2rem;
+
+				/* On thumbnail mode, we can just click the image */
+				#selectEntry {
+					display: none;
+				}
+
+				.item {
+					display: flex;
+					justify-content: space-between;
+					flex-direction: column;
+					width: 20vh;
+					height: 40vh;
+
+					.thumb-container {
+						height: 30vh;
+
+						img {
+							max-width: 100%;
+							max-height: 100%;
+						}
+					}
+
+					p {
+						height: 4rem;
+						line-height: 1;
+						padding: 0;
+						margin: 0;
+						overflow-y: hidden;
+					}
+				}
+			}
+
+			.item-list.list:not(.drag-files-is-active) {
 				overflow-y: scroll;
 				margin: 0;
 				padding: 0;
@@ -62,60 +109,67 @@
 				.item:nth-child(odd) {
 					background-color: rgb(90, 103, 116);
 				}
-				.drag-text {
-					display: none;
+
+				.item {
+					display: grid;
+					grid-template-columns: auto 5rem;
+					justify-content: space-between;
+					align-items: center;
+
+					.thumb-container.show-thumb-on-list-mode {
+						/* display: block; */
+						position: absolute;
+						top: 50%;
+						left: 50%;
+						transform: translate(-50%, -50%);
+						z-index: 2;
+						width: 30rem;
+						pointer-events: none;
+
+						img {
+							display: flex;
+							margin: auto;
+							justify-self: center;
+							max-width: 50%;
+							max-height: 50%;
+						}
+					}
+
+					/* Hide the thumbnail on list mode but only if we're
+					not hovering ove its entry */
+					.thumb-container:not(.show-thumb-on-list-mode) {
+						display: none;
+					}
+
+					button {
+						width: 5rem;
+					}
+				}
+
+				.item p {
+					margin: 0;
+					overflow: hidden;
+					text-overflow: ellipsis;
+					white-space: nowrap;
+					color: cyan;
 				}
 			}
 
-			.item {
-				display: grid;
-				grid-template-columns: auto 5rem;
-				justify-content: space-between;
-				align-items: center;
-
-				button {
-					width: 5rem;
-				}
-			}
-
-			.item p {
-				margin: 0;
-				overflow: hidden;
-				text-overflow: ellipsis;
-				white-space: nowrap;
-				color: cyan;
-			}
-
-			.active {
+			.drag-files-is-active {
 				display: flex;
 				align-items: center;
 				justify-content: center;
 				border: 2px dotted black;
 				overflow: hidden;
+				height: 100%;
+
 				.item {
 					display: none;
 				}
+
 				.drag-text {
 					display: block;
 					font-size: x-large;
-				}
-			}
-
-			.thumb-area {
-				position: absolute;
-				top: 50%;
-				left: 50%;
-				transform: translate(-50%, -50%);
-				z-index: 2;
-				width: 30rem;
-				pointer-events: none;
-
-				img {
-					display: flex;
-					margin: auto;
-					justify-self: center;
-					max-width: 50%;
-					max-height: 50%;
 				}
 			}
 
@@ -131,29 +185,45 @@
 					margin: 0px;
 					padding: 0px;
 					width: 99%;
+					height: 100dvh;
 					border: 2px solid white;
+				}
+
+				#listingModeWrapper {
+					flex-direction: column;
+					justify-content: center;
+					text-align: center;
 				}
 
 				.item-list {
 					height: auto;
+
+					.item {
+						display: flex;
+					}
 				}
 
-				.item {
+				.item-list.thumb {
+					height: auto;
+					margin-left: 0.5rem;
+				}
+
+				.item.list {
 					display: flex;
 
 					:nth-child(2) {
 						width: 8rem;
 						height: 2rem;
 					}
-				}
 
-				.item p {
-					margin: 0;
-					flex: 1 1;
-					min-width: 0;
-					overflow: hidden;
-					white-space: normal;
-					word-break: break-word;
+					.item p {
+						margin: 0;
+						flex: 1 1;
+						min-width: 0;
+						overflow: hidden;
+						white-space: normal;
+						word-break: break-word;
+					}
 				}
 			}
 		</style>
@@ -172,6 +242,28 @@
 			<div class="header">
 				<div>
 					<h1>Index of {{ current.split('/')|last }}</h1>
+					<div id="listingModeWrapper">
+						<input
+							id="modeList"
+							type="radio"
+							name="listingMode"
+							onclick="
+								dragArea.classList.replace('thumb', 'list');
+								sessionStorage.removeItem('thumbMode');
+							"
+						/>
+						<label for="modeList">List mode</label>
+						<input
+							id="modeThumb"
+							type="radio"
+							name="listingMode"
+							onclick="
+								dragArea.classList.replace('list', 'thumb');
+								sessionStorage.setItem('thumbMode', 1);
+							"
+						/>
+						<label for="modeThumb">Thumbnail mode</label>
+					</div>
 					<input
 						id="search"
 						type="text"
@@ -184,14 +276,35 @@
 					<p id="note">Drag and drop or select a folder or file below</p>
 				</div>
 			</div>
-			<div id="dragArea" class="item-list">
+			<div id="dragArea" class="item-list list">
 				<p class="drag-text">Drop files or folders</p>
 				{% for entry in entries %}
 				<div class="item" data-filename="{{ entry.name }}">
+					<!-- For the block/thumbnail visualisation  -->
+					<div class="thumb-container">
+						<a
+							class="thumbnail"
+							{%
+							if
+							entry.file
+							%}
+							href="/unzip?file={{ entry.absolute }}"
+							{%
+							else
+							%}
+							href="/reader?file={{ entry.absolute }}"
+							{%
+							endif
+							%}
+						>
+							<img src="file/{{ entry.thumbnail }}" alt="Thumbnail" />
+						</a>
+					</div>
+
 					<p
 						title="{{ entry.absolute }}"
-						onmouseenter="updateThumbnail(event, `{{ entry.thumbnail }}`)"
-						onmouseleave="globalThumbnail.style.display = 'none'"
+						onmouseenter="updateThumbnail(event)"
+						onmouseleave="updateThumbnail(event)"
 					>
 						{% if entry.file %} {{ '📄 ' }}
 						<a href="/file/{{ entry.absolute }}">{{ entry.name }}</a>
@@ -199,33 +312,44 @@
 						<a href="/picker?path={{ entry.absolute }}">{{ entry.name }}</a>
 						{% endif %}
 					</p>
-					{% if entry.file %}
-					<button onclick="window.location = '/unzip?file={{ entry.absolute }}'">Select</button>
-					{% else%}
-					<form action="/reader">
-						<input type="hidden" name="file" value="{{ entry.absolute }}" />
-						<button>Select</button>
-					</form>
-					{% endif %}
+
+					<!-- For the list visualisation -->
+					<div>
+						{% if entry.file %}
+						<button id="selectEntry" onclick="window.location = '/unzip?file={{ entry.absolute }}'">
+							Select
+						</button>
+						{% else%}
+						<form id="selectEntry" action="/reader">
+							<input type="hidden" name="file" value="{{ entry.absolute }}" />
+							<button>Select</button>
+						</form>
+						{% endif %}
+					</div>
 				</div>
+
 				{% endfor %}
-				<div id="globalThumbnail" class="thumb-area" style="display: none">
-					<img id="globalThumbnailImage" onerror="console.log" />
-				</div>
 			</div>
 		</main>
 		<script>
+			if (sessionStorage.getItem("thumbMode")) {
+				dragArea.classList.replace("list", "thumb");
+				modeThumb.checked = true;
+			} else {
+				modeList.checked = true;
+			}
+
 			window.onload = () => {
 				if ("showOpenFilePicker" in window) {
 					dragArea.addEventListener("drop", onDrop);
 
 					dragArea.addEventListener("dragenter", (event) => {
-						dragArea.classList.add("active");
+						dragArea.classList.add("drag-files-is-active");
 					});
 
 					dragArea.addEventListener("dragleave", (event) => {
 						if (event.target === dragArea) {
-							dragArea.classList.remove("active");
+							dragArea.classList.remove("drag-files-is-active");
 						}
 					});
 
@@ -275,17 +399,15 @@
 					return;
 				}
 
-				dragArea.classList.remove("active"); // Reset state for case when user pop the history back to this page
+				dragArea.classList.remove("drag-files-is-active"); // Reset state for case when user pop the history back to this page
 				fetch("/paste", { method: "POST", body: form })
 					.then((r) => (window.location.href = r.url))
 					.catch(alert);
 			}
 
-			function updateThumbnail(event, thumb) {
-				if (thumb) {
-					globalThumbnail.style.display = "";
-					globalThumbnailImage.src = "/file/" + thumb;
-				}
+			function updateThumbnail(event) {
+				const entryThumb = event.target.parentElement.getElementsByClassName("thumb-container")[0];
+				entryThumb.classList.toggle("show-thumb-on-list-mode");
 			}
 
 			let timer = null;

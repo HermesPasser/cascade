@@ -1,4 +1,3 @@
-from functools import lru_cache
 from itertools import chain
 import os
 from pathlib import Path
@@ -58,14 +57,14 @@ def _get_thumbnail(
         return get_first_file(full, filter_fn) or ""
 
     try:
-        # If is not an archive, then is a folder. Get the first image from the folder
+        # If is not an archive, then is a folder. Get the first image we can find from that folder
         return str(next(iterate_images(full)))
     except StopIteration:
         pass
 
     try:
-        # If the folder has no images, look for the first archive and
-        # search for images in it
+        # If the folder has no images, look for the first archive we found in that
+        # folder and search for the first image in it
         archive_path = next(iterate_archives(full))
         return get_first_file(archive_path, filter_fn) or ""
     except StopIteration:
