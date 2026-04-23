@@ -114,6 +114,10 @@ def reader():
     parent = str(Path(og_path).parent)
     entries, _ = dir_entries(parent)
 
+    if not pages:
+        flask.flash("Directory/archive has not images")
+        return flask.redirect("/")
+
     return flask.render_template(
         "reader.html", pages=pages, entries=entries, current=og_path, parent=parent
     )
