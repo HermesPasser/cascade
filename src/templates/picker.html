@@ -272,7 +272,7 @@
 					/>
 				</div>
 				<div>
-					<p><a href="/picker?path={{ prev }}">{{ prev }}</a> (parent)</p>
+					<p><a href="/picker?path={{ prev|quote_plus }}">{{ prev }}</a> (parent)</p>
 					<p id="note">Drag and drop or select a folder or file below</p>
 				</div>
 			</div>
@@ -307,21 +307,24 @@
 						onmouseleave="updateThumbnail(event)"
 					>
 						{% if entry.file %} {{ '📄 ' }}
-						<a href="/file/{{ entry.absolute }}">{{ entry.name }}</a>
+						<a href="/file/{{ entry.absolute|quote_plus }}">{{ entry.name }}</a>
 						{% else %} {{ '📂 ' }}
-						<a href="/picker?path={{ entry.absolute }}">{{ entry.name }}</a>
+						<a href="/picker?path={{ entry.absolute|quote_plus }}">{{ entry.name }}</a>
 						{% endif %}
 					</p>
 
 					<!-- For the list visualisation -->
 					<div>
 						{% if entry.file %}
-						<button id="selectEntry" onclick="window.location = '/unzip?file={{ entry.absolute }}'">
+						<button
+							id="selectEntry"
+							onclick="window.location = '/unzip?file={{ entry.absolute|quote_plus }}'"
+						>
 							Select
 						</button>
 						{% else%}
 						<form id="selectEntry" action="/reader">
-							<input type="hidden" name="file" value="{{ entry.absolute }}" />
+							<input type="hidden" name="file" value="{{ entry.absolute|quote_plus }}" />
 							<button>Select</button>
 						</form>
 						{% endif %}

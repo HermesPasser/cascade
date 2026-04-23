@@ -1,5 +1,6 @@
 from pathlib import Path
 import secrets
+from urllib.parse import quote_plus, unquote_plus
 
 import flask
 
@@ -13,6 +14,7 @@ from unzip import unzip_file
 
 app = flask.Flask(__name__)
 app.secret_key = secrets.SystemRandom().randbytes(100000)
+app.jinja_env.filters["quote_plus"] = lambda u: quote_plus(u, safe="/")
 
 
 @app.errorhandler(FileNotFoundError)
@@ -87,7 +89,7 @@ def unzip():
         descompressed_path = unzip_file(file)
 
     return flask.redirect(
-        "/reader?file=" + descompressed_path + "&orignal_path=" + file
+        "/reader?file=" + descompressed_path + "&orignal_path=" + quote_plus(file)
     )
 
 
@@ -98,6 +100,7 @@ def reader():
         flask.flash("No folder provided")
         return flask.redirect("/picker")
 
+    folder = unquote_plus(folder)
     # TODO: maybe we should check if the entries contain any *files*
     # We get the original path since we open files on a temp folder but we
     # want to show the directory from the original file.
@@ -107,7 +110,8 @@ def reader():
     if not Path(folder).exists() and og_path:
         flask.flash("Neither temp folder nor original folder exists")
         return flask.redirect(
-            f"/unzip?file={og_path}&page=" + flask.request.args.get("page", "")
+            f"/unzip?file={quote_plus(og_path)}&page="
+            + flask.request.args.get("page", "")
         )
 
     pages = ["/file" + img for img in list_images_from_folder(folder)]
@@ -115,7 +119,7 @@ def reader():
     entries, _ = dir_entries(parent)
 
     if not pages:
-        flask.flash("Directory/archive has not images")
+        flask.flash("Directory/archive has no images")
         return flask.redirect("/")
 
     return flask.render_template(
