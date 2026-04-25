@@ -2,124 +2,8 @@
 <html>
 	<head>
 		<title>Reader - {{ current.split('/') | last }}</title>
-		<style>
-			:root {
-				--img-margin: auto;
-				--direction: column; /* so i can change to columns if i ever implemnte double page*/
-				--background: white;
-			}
-
-			body {
-				display: flex;
-				flex-direction: row;
-				background-color: var(--background);
-			}
-
-			body:fullscreen {
-				background-color: red;
-				overflow: auto;
-			}
-
-			.controls.closed {
-				transform: translateX(50vh);
-			}
-
-			.controls {
-				display: flex;
-				flex-direction: column;
-				box-shadow: 20px 0 2px -20px gray inset;
-				background: var(--background);
-				max-height: calc(100vh - 32px);
-				max-width: 10%;
-				overflow: auto;
-				transform: translateX(0px);
-				transition: 0.5s;
-				gap: 0.2rem;
-				padding: 1rem 1rem;
-
-				position: fixed;
-				bottom: 0;
-				right: 0;
-				top: 0;
-
-				span {
-					text-align: center;
-					a {
-						text-decoration: none;
-					}
-				}
-
-				.control-input {
-					padding: 10px 8px;
-					border-radius: 6px;
-					box-shadow: none;
-
-					&:not(:hover):not(:active):not(:focus) {
-						border: 1px solid #e0e0e0;
-					}
-				}
-
-				.controls-close-wrapper {
-					display: flex;
-					align-items: flex-start;
-					flex-direction: column;
-					margin-bottom: 1rem;
-
-					button {
-						border: none;
-						border-radius: 50%;
-						padding: 1rem 1rem;
-
-						&:not(:hover):not(:active):not(:focus) {
-							box-shadow: none;
-							background: unset;
-						}
-					}
-				}
-
-				.bg-color-button {
-					display: flex;
-					align-items: center;
-					justify-content: center;
-
-					input {
-						border: none;
-						box-shadow: none;
-						appearance: none;
-						padding: 0;
-					}
-				}
-
-				.controls-navigator {
-					display: flex;
-					justify-content: space-around;
-					gap: .5rem;
-					select {
-						width: 100%;
-					}
-
-					button {
-						width: auto;
-					}
-				}
-			}
-
-			@media only screen and (max-width: 1000px) {
-				.controls {
-					width: 50%;
-					max-width: 50%;
-
-					span {
-						font-size: xx-large;
-					}
-					select,
-					button {
-						font-size: xx-large;
-					}
-				}
-			}
-		</style>
-		<link rel="stylesheet" href="{{ url_for('static', filename='reader/imagecontainer.css') }}">
+		<link rel="stylesheet" href="{{ url_for('static', filename='reader/css/base.css') }}" />
+		<link rel="stylesheet" href="{{ url_for('static', filename='reader/css/imagecontainer.css') }}" />
 	</head>
 
 	<body>
@@ -129,9 +13,7 @@
 			<div class="controls-close-wrapper">
 				<button onclick="controls.classList.toggle('closed')">X</button>
 			</div>
-			<span>
-				<a href="/picker?path={{ parent }}">↖️</a> {{ current.split('/') | last }}
-			</span>
+			<span> <a href="/picker?path={{ parent }}">↖️</a> {{ current.split('/') | last }} </span>
 			<div class="controls-navigator">
 				<button onclick="previousImage(event)" class="control-input">&lt;</button>
 				<select id="pageSelector" onchange="changePageFromSelector()" class="control-input">
@@ -143,7 +25,7 @@
 			</div>
 			<div class="controls-navigator">
 				<button onclick="previousEntry()" class="control-input">&lt;</button>
-				 <!-- TODO: prev and next need to be relative to the 'current'. Pass from python or edit via js -->
+				<!-- TODO: prev and next need to be relative to the 'current'. Pass from python or edit via js -->
 				<select id="entrySelector" onchange="changeEntry(event.target.value)" class="control-input">
 					{% for entry in entries %}
 					<option {{ "selected" if current == entry.absolute else "" }} value="{{ entry.absolute }}">
@@ -151,7 +33,7 @@
 					</option>
 					{% endfor %}
 				</select>
-				<button onclick="nextEntry()"class="control-input">&gt;</button>
+				<button onclick="nextEntry()" class="control-input">&gt;</button>
 			</div>
 			<!-- TODO: portugues por consistência -->
 			<button onclick="padding()" class="control-input">add padding</button>
@@ -172,211 +54,6 @@
 		<script id="imagesJson" type="application/json">
 			{{ pages|tojson }}
 		</script>
-		<script>
-			"use strict";
-
-			// TODO: dark mode
-
-			const DISPLAY_MODE = Object.freeze({
-				LONG_STRIP: "longstrip",
-				SINGLE_PAGE: "singlepage"
-			});
-
-			const SIZE_MODE = Object.freeze({
-				FIT_WIDTH: { value: "fit-width", text: "Fit Width"},
-				FIT_HEIGHT: { value: "fit-height", text: "Fit Height"},
-				STRETCH_WIDTH: { value: "stretch-width", text: "Stretch Width"},
-				NO_LIMIT: { value: "no-limit", text: "No Limit"},
-			});
-
-			let mode = DISPLAY_MODE.SINGLE_PAGE;
-			let currentSizeMode = SIZE_MODE.FIT_WIDTH;
-			const images = JSON.parse(imagesJson.textContent);
-			let index = (Number.parseInt(new URLSearchParams(new URL(window.location).search).get("page")) || 1) - 1;
-
-			window.onload = (_) => {
-				updateSelector();
-				display(mode);
-				applySize(SIZE_MODE.FIT_WIDTH);
-			};
-
-			function display(newMode) {
-				// TODO: May we should not actually delete all the elements when its not need?
-				mode = newMode;
-				let maybeImgToScroolTo = null;
-				imageWrapper.querySelectorAll("*").forEach((e) => e.remove());
-				if (mode === DISPLAY_MODE.LONG_STRIP) {
-					layoutLongstrip();
-					images.forEach((image, i) => {
-						const img = document.createElement("img");
-						img.src = image;
-						img.setAttribute("data-img-index", i.toString());
-						// Maybe add the option for lerping to the next image instead of jumping
-						imageWrapper.appendChild(img);
-
-						if (i === index) {
-							maybeImgToScroolTo = img;
-						}
-
-						if (i === images.length - 1) {
-							// NOTE: if i pass the img dimensions, set the size beforehand then i would not have to wait
-							//       for others images to load before scrolling into the right place.
-
-							// Scroll to current image index after the last image (and the others, i hope) is loaded
-							img.onload = () => {
-								if (maybeImgToScroolTo) {
-									maybeImgToScroolTo.scrollIntoView();
-								}
-							};
-							img.onerror = img.onload;
-						}
-					});
-				} else {
-					layoutManga();
-					const img = document.createElement("img");
-					img.src = images[index] ?? images[0];
-					img.setAttribute("data-img-index", "0");
-					imageWrapper.appendChild(img);
-				}
-			}
-
-			function toogleMode() {
-				if (mode === DISPLAY_MODE.LONG_STRIP) {
-					manga();
-					modeButton.innerText = "Mode: Single Page";
-				} else {
-					modeButton.innerText = "Mode: Long Strip";
-					longstrip();
-				}
-			}
-
-			function toogleSize() {
-				const sizingModes = Object.values(SIZE_MODE);
-				const index = (sizingModes.indexOf(currentSizeMode) + 1) % sizingModes.length;
-				applySize(sizingModes[index]);
-			}
-
-			function applySize(sizeMode) {
-				currentSizeMode = sizeMode;
-				imageWrapper.className = "image-wrapper " + currentSizeMode.value;
-				sizeButton.innerText = "Size: " + currentSizeMode.text;
-			}
-
-			function fullscreen() {
-				if (document.fullscreenElement) {
-					document.exitFullscreen();
-					fullscreenButton.innerText = "Fullscreen: Disabled";
-				} else {
-					document.body.requestFullscreen();
-					fullscreenButton.innerText = "Fullscreen: Enabled";
-				}
-			}
-
-			function handleClick(event) {
-				// Would be nice if this was changed to clicking top/bottom on longstrip mode
-				// TODO: later configure if 'left' click should go back or if clicking should go always to the next
-				const rect = event.target.getBoundingClientRect();
-				const x = event.clientX - rect.left;
-				const w = rect.width;
-				if (x < w / 3) {
-					previousImage();
-				} else if (x < (2 * w) / 3) {
-					controls.classList.toggle("closed");
-				} else {
-					nextImage();
-				}
-			}
-
-			function previousEntry() {
-				const current  = "{{ current }}"
-				const currentEl = Array.from(entrySelector.getElementsByTagName('option')).find(o => o.value === current)
-
-				if (currentEl.previousElementSibling) {
-					changeEntry(currentEl.previousElementSibling.value)
-				}
-			}
-
-			function nextEntry() {
-				const current  = "{{ current }}"
-				const currentEl = Array.from(entrySelector.getElementsByTagName('option')).find(o => o.value === current)
-
-				if (currentEl.nextElementSibling) {
-					changeEntry(currentEl.nextElementSibling.value)
-				}
-			}
-
-			function changeEntry(entry) {
-				window.location.replace("/unzip?file=" + entry)
-			}
-
-			function updateSelector() {
-				pageSelector.value = index + 1;
-			}
-
-			function previousImage() {
-				changePage(index - 1);
-			}
-
-			function nextImage() {
-				changePage(index + 1);
-			}
-
-			function changePageFromSelector() {
-				changePage(pageSelector.value - 1);
-			}
-
-			function changePage(newIndex) {
-				if (newIndex < 1 || newIndex >= images.length) {
-					newIndex = 0;
-				}
-
-				index = newIndex;
-				// TODO: make option scrolling into view be also "instant"
-
-				if (mode === DISPLAY_MODE.SINGLE_PAGE) {
-					const imgElement = imageWrapper.getElementsByTagName("img")[0];
-					imgElement.src = images[index];
-
-					// On single page mode we scroll back to the top when the image is replaced by the next
-					// TODO: make configurable
-					imageWrapper.scrollIntoView({ behavior: "smooth" });
-				} else if (mode === DISPLAY_MODE.LONG_STRIP) {
-					// TODO: this can make the scroll go backwards if the user is
-					//       "between" two pages. To fix we need to get the index
-					//       from the image that the user actually clicked
-					const imgElement = imageWrapper.querySelector(`[data-img-index="${newIndex}"]`);
-					imgElement.scrollIntoView({ behavior: "smooth" });
-				}
-
-				let url = new URL(window.location.href);
-				url.searchParams.set("page", index + 1 + "");
-				window.history.pushState({}, "", url);
-				updateSelector();
-			}
-
-			const root = document.documentElement;
-			function padding() {
-				root.style.setProperty("--img-margin", "20px");
-			}
-
-			function layoutLongstrip() {
-				root.style.setProperty("--img-margin", "auto");
-				root.style.setProperty("--direction", "column");
-			}
-
-			function longstrip() {
-				display(DISPLAY_MODE.LONG_STRIP);
-			}
-
-			function layoutManga() {
-				root.style.setProperty("--img-margin", "auto");
-				root.style.setProperty("--direction", "row");
-			}
-
-			function manga() {
-				display(DISPLAY_MODE.SINGLE_PAGE);
-				imageWrapper.scrollIntoView();
-			}
-		</script>
+		<script src="{{ url_for('static', filename='reader/js/index.js') }}"></script>
 	</body>
 </html>
