@@ -98,6 +98,23 @@ function fullscreen() {
 	}
 }
 
+function handleScroll(event) {
+	if (mode === DISPLAY_MODE.LONG_STRIP) {
+		const element = document.elementFromPoint(event.clientX, event.clientY);
+
+		if (!(element instanceof HTMLImageElement)) {
+			return;
+		}
+
+		const currentImageIndex = parseInt(element.attributes["data-img-index"].value);
+		if (currentImageIndex !== index) {
+			index = currentImageIndex;
+			updatePageUrl(currentImageIndex);
+			updateSelector(currentImageIndex);
+		}
+	}
+}
+
 function handleClick(event) {
 	// Would be nice if this was changed to clicking top/bottom on longstrip mode
 	// TODO: later configure if 'left' click should go back or if clicking should go always to the next
@@ -174,10 +191,15 @@ function changePage(newIndex) {
 		imgElement.scrollIntoView({ behavior: "smooth" });
 	}
 
+	updatePageUrl(index);
+	updateSelector(index);
+}
+
+function updatePageUrl(index) {
+	//  The page number on the url is 1-based so we convert the index here
 	let url = new URL(window.location.href);
-	url.searchParams.set("page", index + 1 + "");
+	url.searchParams.set("page", (index + 1).toString());
 	window.history.pushState({}, "", url);
-	updateSelector();
 }
 
 const root = document.documentElement;

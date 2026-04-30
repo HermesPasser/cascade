@@ -7,7 +7,7 @@
 	</head>
 
 	<body>
-		<div id="imageWrapper" class="image-wrapper" onclick="handleClick(event)"></div>
+		<div id="imageWrapper" class="image-wrapper" onwheel="handleScroll(event)" onclick="handleClick(event)"></div>
 
 		<div id="controls" class="controls">
 			<div class="controls-close-wrapper">
@@ -35,7 +35,6 @@
 				</select>
 				<button onclick="nextEntry()" class="control-input">&gt;</button>
 			</div>
-			<!-- TODO: portugues por consistência -->
 			<button onclick="padding()" class="control-input">add padding</button>
 			<button id="modeButton" onclick="toogleMode()" class="control-input">Mode: Singe Page</button>
 			<button id="sizeButton" onclick="toogleSize()" class="control-input">Size:</button>
