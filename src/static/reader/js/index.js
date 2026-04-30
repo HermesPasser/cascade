@@ -154,6 +154,8 @@ function changeEntry(entry) {
 
 function updateSelector() {
 	pageSelector.value = index + 1;
+	const percentage = ((index + 1) / images.length) * 100;
+	root.style.setProperty("--progress", percentage + "%");
 }
 
 function previousImage() {
@@ -224,4 +226,14 @@ function layoutManga() {
 function manga() {
 	display(DISPLAY_MODE.SINGLE_PAGE);
 	imageWrapper.scrollIntoView();
+}
+
+function toogleProgress() {
+	if (progressBar.style.display === "") {
+		progressBar.style.display = "none";
+		progressButton.innerText = "Progress bar: hidden";
+	} else {
+		progressBar.style.display = "";
+		progressButton.innerText = "Progress bar: visible";
+	}
 }

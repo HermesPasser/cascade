@@ -1,4 +1,5 @@
 :root {
+	--progress: 0%;
 	--img-margin: auto;
 	--direction: column; /* so i can change to columns if i ever implemnte double page*/
 	--background: white;
@@ -13,6 +14,48 @@ body {
 body:fullscreen {
 	background-color: red;
 	overflow: auto;
+}
+
+.progress-bar {
+	position: fixed;
+	background: linear-gradient(90deg, rgb(107, 146, 134) var(--progress), rgb(255, 255, 255) var(--progress)) no-repeat;
+	background-size: 100% 40%;
+	background-position: 0 bottom;
+	opacity: 0.5;
+	display: flex;
+	justify-content: space-evenly;
+	flex-grow: 1;
+	margin: 0;
+	padding: 0;
+	bottom: 0;
+	left: 0;
+	right: 0;
+
+	&:hover {
+		opacity: 1;
+	}
+
+	button {
+		background: none;
+		border: none;
+		border-left: solid 1px rgba(107, 146, 134, 0.2);
+		text-align: center;
+		flex: 1;
+		width: 0;
+		margin: 0;
+		padding: 0;
+		color: transparent;
+
+		&:hover {
+			color: #fff;
+			font-weight: bolder;
+			background: linear-gradient(180deg, rgba(107, 146, 134, 0.22), rgba(107, 146, 134, 0.45));
+			box-shadow:
+				0 1px 0 rgba(0, 0, 0, 0.6),
+				inset 0 1px 0 rgba(255, 255, 255, 0.15);
+			transform: translateY(-1px);
+		}
+	}
 }
 
 .controls.closed {
@@ -42,6 +85,10 @@ body:fullscreen {
 		a {
 			text-decoration: none;
 		}
+	}
+
+	.big {
+		min-width: 10rem;
 	}
 
 	.control-input {
