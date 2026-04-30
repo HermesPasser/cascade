@@ -8,7 +8,11 @@
 
 	<body>
 		<div id="imageWrapper" class="image-wrapper" onwheel="handleScroll(event)" onclick="handleClick(event)"></div>
-
+		<div id="progressBar" class="progress-bar">
+			{% for i in pages %}
+			<button onclick="changePage(parseInt('{{ loop.index - 1 }}'))">{{ loop.index }}</button>
+			{% endfor %}
+		</div>
 		<div id="controls" class="controls">
 			<div class="controls-close-wrapper">
 				<button onclick="controls.classList.toggle('closed')">X</button>
@@ -36,10 +40,13 @@
 				<button onclick="nextEntry()" class="control-input">&gt;</button>
 			</div>
 			<button onclick="padding()" class="control-input">add padding</button>
-			<button id="modeButton" onclick="toogleMode()" class="control-input">Mode: Singe Page</button>
-			<button id="sizeButton" onclick="toogleSize()" class="control-input">Size:</button>
+			<button id="modeButton" onclick="toogleMode()" class="control-input big">Mode: Singe Page</button>
+			<button id="sizeButton" onclick="toogleSize()" class="control-input big">Size:</button>
+			<button id="progressButton" onclick="toogleProgress()" class="control-input big">
+				Progress bar: visible
+			</button>
 			<button id="fullscreenButton" onclick="fullscreen()">Fullscreen: Disabled</button>
-			<button onclick="colorInput.click()" class="bg-color-button control-input">
+			<button onclick="colorInput.click()" class="bg-color-button control-input big">
 				background
 				<input
 					id="colorInput"
