@@ -27,7 +27,7 @@
 							name="listingMode"
 							onclick="
 								dragArea.classList.replace('thumb', 'list');
-								sessionStorage.removeItem('thumbMode');
+								localStorage.removeItem('thumbMode');
 							"
 						/>
 						<label for="modeList">List mode</label>
@@ -37,7 +37,7 @@
 							name="listingMode"
 							onclick="
 								dragArea.classList.replace('list', 'thumb');
-								sessionStorage.setItem('thumbMode', 1);
+								localStorage.setItem('thumbMode', 1);
 							"
 						/>
 						<label for="modeThumb">Thumbnail mode</label>
@@ -113,7 +113,7 @@
 			</div>
 		</main>
 		<script>
-			if (sessionStorage.getItem("thumbMode")) {
+			if (localStorage.getItem("thumbMode")) {
 				dragArea.classList.replace("list", "thumb");
 				modeThumb.checked = true;
 			} else {
