@@ -71,7 +71,7 @@ def index():
 @app.get("/file/<path:file>")
 def file(file: str):
     # TODO: handle permissions
-    path = Path("/" + file)
+    path = Path(unquote_plus("/" + file))
     return flask.send_from_directory(path.parent, path.name, as_attachment=False)
 
 
