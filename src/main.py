@@ -7,6 +7,7 @@ import flask
 from fileutils import (
     SUPPORTED_ARCHIVE_EXTENSIONS,
     dir_entries,
+    downsize,
     list_images_from_folder,
     save_to_temp_folder,
 )
@@ -71,7 +72,9 @@ def index():
 @app.get("/file/<path:file>")
 def file(file: str):
     # TODO: handle permissions
-    path = Path(unquote_plus("/" + file))
+    unquoted = unquote_plus("/" + file)
+    mode = flask.request.args.get("mode")
+    path = Path(downsize(unquoted) if mode == "thumb" else unquoted)
     return flask.send_from_directory(path.parent, path.name, as_attachment=False)
 
 

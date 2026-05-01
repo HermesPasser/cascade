@@ -1,4 +1,5 @@
 from collections.abc import Iterable
+from functools import lru_cache
 from itertools import chain
 import os
 from pathlib import Path
@@ -6,6 +7,7 @@ import tempfile
 from typing import Protocol, Sequence, TypedDict
 
 from unzip import get_first_file
+from PIL import Image
 
 SUPPORTED_IMAGE_EXTENSIONS = ("png", "jpeg", "jpg", "gif", "webp")
 SUPPORTED_ARCHIVE_EXTENSIONS = {"zip", "cbz", "epub"}
@@ -55,6 +57,23 @@ def dir_entries(
     prev = str(Path(path).parent)
 
     return files, prev
+
+
+@lru_cache
+def downsize(filename: str):
+    size = 256, 256
+    outfile = os.path.join(tempfile.mkdtemp(), os.path.basename(filename))
+    try:
+        im = Image.open(filename)
+        if im.size < size:
+            return filename
+
+        # Not as ugly as neatrest, not as slow as bicubic/lanzos
+        im.thumbnail(size, Image.Resampling.BILINEAR)
+        im.save(outfile, im.format)
+        return outfile
+    except IOError:
+        return filename
 
 
 def _get_thumbnail(
