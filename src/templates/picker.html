@@ -66,11 +66,11 @@
 							if
 							entry.file
 							%}
-							href="/unzip?file={{ entry.absolute }}"
+							href="/unzip?file={{ entry.absolute|quote_plus }}"
 							{%
 							else
 							%}
-							href="/reader?file={{ entry.absolute }}"
+							href="/reader?file={{ entry.absolute|quote_plus }}"
 							{%
 							endif
 							%}
