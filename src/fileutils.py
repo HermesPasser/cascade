@@ -1,3 +1,4 @@
+from collections.abc import Iterable
 from itertools import chain
 import os
 from pathlib import Path
@@ -29,11 +30,21 @@ def dir_entries(
 
     for f in os.listdir(path):
         if f in filter or f.startswith("."):
+            # Hidden file
             continue
 
         full = os.path.join(path, f)
         is_file = os.path.isfile(full)
         if is_file and not any(f.endswith(f".{e}") for e in extensions):
+            # Unsupported file format
+            continue
+
+        if os.path.isdir(full) and not any(
+            iterate_files(
+                Path(full), (*SUPPORTED_IMAGE_EXTENSIONS, *SUPPORTED_ARCHIVE_EXTENSIONS)
+            )
+        ):
+            # "Empty" folder
             continue
 
         if is_file or os.path.isdir(full):
@@ -76,22 +87,18 @@ def _get_thumbnail(
     return ""
 
 
-def iterate_archives(path: Path):
+def iterate_files(path: Path, extensions: Iterable):
     return chain(
-        *(
-            path.glob(f"**/*.{pat}", case_sensitive=False)
-            for pat in SUPPORTED_ARCHIVE_EXTENSIONS
-        )
+        *(path.glob(f"**/*.{pat}", case_sensitive=False) for pat in extensions)
     )
+
+
+def iterate_archives(path: Path):
+    return iterate_files(path, SUPPORTED_ARCHIVE_EXTENSIONS)
 
 
 def iterate_images(path: Path):
-    return chain(
-        *(
-            path.glob(f"**/*.{pat}", case_sensitive=False)
-            for pat in SUPPORTED_IMAGE_EXTENSIONS
-        )
-    )
+    return iterate_files(path, SUPPORTED_IMAGE_EXTENSIONS)
 
 
 def list_images_from_folder(folder: str):
