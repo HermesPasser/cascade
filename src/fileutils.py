@@ -3,9 +3,9 @@ from functools import lru_cache
 from itertools import chain
 import os
 from pathlib import Path
-import tempfile
-from typing import Protocol, Sequence, TypedDict
+from typing import TypedDict
 
+from temp import temp_name_for
 from unzip import get_first_file
 from PIL import Image
 
@@ -62,7 +62,7 @@ def dir_entries(
 @lru_cache
 def downsize(filename: str):
     size = 256, 256
-    outfile = os.path.join(tempfile.mkdtemp(), os.path.basename(filename))
+    outfile = temp_name_for(filename)
     try:
         im = Image.open(filename)
         if im.size < size:
@@ -129,21 +129,3 @@ def list_images_from_folder(folder: str):
     images = [str(file) for file in it]
     images.sort()
     return images
-
-
-class Savable(Protocol):
-    @property
-    def filename(self) -> str | None: ...
-    def save(self, dst: os.PathLike[str]): ...
-
-
-def save_to_temp_folder(files: Sequence[Savable]):
-    directory = Path(tempfile.mkdtemp())
-    size = len(files)
-
-    for i, file in enumerate(files, start=1):
-        name = str(i).zfill(len(str(size)))
-        name += "-" + file.filename if file.filename else ""
-        file.save(directory / name)
-
-    return str(directory)

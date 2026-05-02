@@ -1,13 +1,14 @@
 from collections.abc import Callable
 from functools import lru_cache
 import os
-import tempfile
 from zipfile import BadZipFile, ZipFile
+
+from temp import temp_name_for
 
 
 @lru_cache
 def unzip_file(file: str):
-    directory = tempfile.mkdtemp()
+    directory = str(temp_name_for(file))
     with ZipFile(file, "r") as archive:
         archive.extractall(directory)
     return directory
@@ -15,7 +16,7 @@ def unzip_file(file: str):
 
 @lru_cache
 def get_first_file(file: str | os.PathLike, filter_fn: Callable[[str], bool]):
-    directory = tempfile.mkdtemp()
+    directory = str(temp_name_for(file))
     try:
         with ZipFile(file, "r") as archive:
             it = filter(filter_fn, sorted((f.filename for f in archive.filelist)))
