@@ -121,25 +121,31 @@
 			}
 
 			window.onload = () => {
-				if ("showOpenFilePicker" in window) {
-					dragArea.addEventListener("drop", onDrop);
+				const canDragAndDrop = Boolean(Number.parseInt("{{client_is_on_localhost}}"));
 
-					dragArea.addEventListener("dragenter", (event) => {
-						dragArea.classList.add("drag-files-is-active");
-					});
+				if (canDragAndDrop) {
+					if ("showOpenFilePicker" in window) {
+						dragArea.addEventListener("drop", onDrop);
 
-					dragArea.addEventListener("dragleave", (event) => {
-						if (event.target === dragArea) {
-							dragArea.classList.remove("drag-files-is-active");
-						}
-					});
+						dragArea.addEventListener("dragenter", (event) => {
+							dragArea.classList.add("drag-files-is-active");
+						});
 
-					dragArea.addEventListener("dragover", (event) => {
-						event.preventDefault();
-					});
+						dragArea.addEventListener("dragleave", (event) => {
+							if (event.target === dragArea) {
+								dragArea.classList.remove("drag-files-is-active");
+							}
+						});
+
+						dragArea.addEventListener("dragover", (event) => {
+							event.preventDefault();
+						});
+					} else {
+						note.innerText =
+							"Select a folder or file below (drag and drop disable since your browser does not fully support the file system API)";
+					}
 				} else {
-					note.innerText =
-						"Select a folder or file below (drag and drop disable since your browser does not fully support the file system API)";
+					note.innerHTML = `Drag and drop functionality only works on <a href="http://{{localhost}}${window.location.pathname}">localhost</a> since we use the file system API`;
 				}
 
 				document.addEventListener("keydown", (e) => {

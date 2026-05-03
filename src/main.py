@@ -1,5 +1,6 @@
 from pathlib import Path
 import secrets
+import socket
 from urllib.parse import quote_plus, unquote_plus
 
 import flask
@@ -16,6 +17,7 @@ from unzip import unzip_file
 app = flask.Flask(__name__)
 app.secret_key = secrets.SystemRandom().randbytes(100000)
 app.jinja_env.filters["quote_plus"] = lambda u: quote_plus(u, safe="/")
+HOST_LOCAL_IP = socket.gethostbyname("localhost")
 
 
 @app.errorhandler(FileNotFoundError)
@@ -59,10 +61,16 @@ def paste():
 
 @app.get("/picker")
 def index():
+    client_is_on_localhost = int(flask.request.remote_addr == HOST_LOCAL_IP)
     path = flask.request.args.get("path", str(Path.home()), type=str)
     entries, prev = dir_entries(path)
     return flask.render_template(
-        "picker.html", entries=entries, current=path, prev=prev
+        "picker.html",
+        entries=entries,
+        current=path,
+        prev=prev,
+        localhost=HOST_LOCAL_IP + ":5000",
+        client_is_on_localhost=client_is_on_localhost,
     )
 
 
