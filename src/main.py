@@ -32,11 +32,8 @@ def home():
     return flask.redirect("/picker")
 
 
-@app.route("/paste", methods=("GET", "POST"))
+@app.post("/paste")
 def paste():
-    if flask.request.method == "GET":
-        return flask.render_template("/paste.html")
-
     files = list(flask.request.files.values())
     if not files:
         return "No files given", 400
