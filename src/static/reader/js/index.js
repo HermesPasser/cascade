@@ -15,7 +15,7 @@ const SIZE_MODE = Object.freeze({
 	NO_LIMIT: { value: "no-limit", text: "No Limit" }
 });
 
-let mode = DISPLAY_MODE.SINGLE_PAGE;
+let mode = localStorage.getItem("manga-mode") ?? DISPLAY_MODE.SINGLE_PAGE;
 let currentSizeMode = SIZE_MODE.FIT_WIDTH;
 const images = JSON.parse(imagesJson.textContent);
 let index = (Number.parseInt(new URLSearchParams(new URL(window.location).search).get("page")) || 1) - 1;
@@ -69,11 +69,11 @@ function display(newMode) {
 function toogleMode() {
 	if (mode === DISPLAY_MODE.LONG_STRIP) {
 		manga();
-		modeButton.innerText = "Mode: Single Page";
 	} else {
-		modeButton.innerText = "Mode: Long Strip";
 		longstrip();
 	}
+
+	localStorage.setItem("manga-mode", mode);
 }
 
 function toogleSize() {
@@ -212,6 +212,7 @@ function padding() {
 function layoutLongstrip() {
 	root.style.setProperty("--img-margin", "auto");
 	root.style.setProperty("--direction", "column");
+	modeButton.innerText = "Mode: Long Strip";
 }
 
 function longstrip() {
@@ -225,6 +226,7 @@ function layoutManga() {
 
 function manga() {
 	display(DISPLAY_MODE.SINGLE_PAGE);
+	modeButton.innerText = "Mode: Single Page";
 	imageWrapper.scrollIntoView();
 }
 
