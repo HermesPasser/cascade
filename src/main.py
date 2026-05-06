@@ -1,6 +1,7 @@
 from pathlib import Path
 import secrets
 import socket
+import sys
 from urllib.parse import quote_plus, unquote_plus
 
 import flask
@@ -135,4 +136,5 @@ def reader():
     )
 
 
-app.run("0.0.0.0", debug=True)
+all_hosts = "--all-hosts" in sys.argv
+app.run(host="0.0.0.0" if all_hosts else "localhost", debug=not all_hosts)
