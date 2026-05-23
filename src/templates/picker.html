@@ -77,7 +77,7 @@
 						>
 							<img
 								src="file/{{ entry.thumbnail }}?mode=thumb"
-								alt="Folder thumbnail"
+								alt="{{ entry.name }}"
 								onerror="this.src = `{{ url_for('static', filename='picker/nocover.svg') }}`"
 							/>
 						</a>
