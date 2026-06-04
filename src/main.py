@@ -57,7 +57,7 @@ def paste():
         folder = next(Path(folder).iterdir())
         return flask.redirect(f"/unzip?file={folder}")
 
-    return flask.redirect(f"/reader?file={folder}&orignal_path={Path.home()}")
+    return flask.redirect(f"/reader?file={folder}&original_path={Path.home()}")
 
 
 @app.get("/picker")
@@ -98,7 +98,7 @@ def unzip():
         descompressed_path = unzip_file(file)
 
     return flask.redirect(
-        "/reader?file=" + descompressed_path + "&orignal_path=" + quote_plus(file)
+        "/reader?file=" + descompressed_path + "&original_path=" + quote_plus(file)
     )
 
 
@@ -113,7 +113,7 @@ def reader():
     # TODO: maybe we should check if the entries contain any *files*
     # We get the original path since we open files on a temp folder but we
     # want to show the directory from the original file.
-    og_path = flask.request.args.get("orignal_path", folder, type=str)
+    og_path = flask.request.args.get("original_path", folder, type=str)
 
     # Re-uncompress the zip if the user bookmark the link and the temp folder is gone
     if not Path(folder).exists() and og_path:
