@@ -47,6 +47,7 @@ body:fullscreen {
 		color: transparent;
 
 		&:hover {
+			text-shadow: 1px 1px 2px black;
 			color: #fff;
 			font-weight: bolder;
 			background: linear-gradient(180deg, rgba(107, 146, 134, 0.22), rgba(107, 146, 134, 0.45));
