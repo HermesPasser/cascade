@@ -123,7 +123,7 @@ def reader():
             + flask.request.args.get("page", "")
         )
 
-    pages = ["/file" + img for img in list_images_from_folder(folder)]
+    pages = ["/file" + quote_plus(img) for img in list_images_from_folder(folder)]
     parent = str(Path(og_path).parent)
     entries, _ = dir_entries(parent)
 
