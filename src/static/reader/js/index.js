@@ -205,8 +205,8 @@ function updatePageUrl(index) {
 }
 
 const root = document.documentElement;
-function padding() {
-	root.style.setProperty("--img-margin", "20px");
+function padding(size) {
+	root.style.setProperty("--img-margin", size + "px");
 }
 
 function layoutLongstrip() {

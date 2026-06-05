@@ -38,24 +38,43 @@
 				</select>
 				<button onclick="nextEntry()" class="control-input">&gt;</button>
 			</div>
-			<button onclick="padding()" class="control-input">add padding</button>
 			<button id="modeButton" onclick="toogleMode()" class="control-input big">Mode: Singe Page</button>
 			<button id="sizeButton" onclick="toogleSize()" class="control-input big">Size:</button>
 			<button id="progressButton" onclick="toogleProgress()" class="control-input big">
 				Progress bar: visible
 			</button>
-			<button id="fullscreenButton" onclick="fullscreen()">Fullscreen: Disabled</button>
-			<button onclick="colorInput.click()" class="bg-color-button control-input big">
-				background
+			 <button id="fullscreenButton" onclick="fullscreen()">Fullscreen: Disabled</button>
+			<button onclick="configDialog.showModal()" class="control-input">Extra settings</button>
+			</button>
+		</div>
+		<dialog id="configDialog">
+			<label>
+				Page Gap
 				<input
+					type="range"
+					value="0"
+					min="0"
+					max="20"
+					onclick="
+						padding(event.target.value);
+						paddingPixels.innerText = event.target.value + 'px';
+					"
+				/>
+				(<span id="paddingPixels">0px</span>)
+			</label>
+
+			<label>
+				Background color
+				<input
+					value="#ffffff"
 					id="colorInput"
-					class="sex"
 					onchange="root.style.setProperty('--background', event.target.value)"
 					type="color"
 				/>
-			</button>
-		</div>
+			</label>
 
+			<button onclick="configDialog.close()">Close</button>
+		</dialog>
 		<script id="imagesJson" type="application/json">
 			{{ pages|tojson }}
 		</script>
