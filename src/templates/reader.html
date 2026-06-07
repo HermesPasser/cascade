@@ -6,7 +6,7 @@
 		<link rel="stylesheet" href="{{ url_for('static', filename='reader/css/imagecontainer.css') }}" />
 	</head>
 
-	<body>
+	<body onkeydown="onKeyDown(event)">
 		<div id="imageWrapper" class="image-wrapper" onwheel="handleScroll(event)" onclick="handleClick(event)"></div>
 		<div id="progressBar" class="progress-bar">
 			{% for i in pages %}

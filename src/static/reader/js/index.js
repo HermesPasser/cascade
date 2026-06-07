@@ -130,6 +130,16 @@ function handleClick(event) {
 	}
 }
 
+function onKeyDown(e) {
+	const leftKeys = ["ArrowLeft", "KeyA", "Numpad4"];
+	const rightKeys = ["ArrowRight", "KeyD", "Numpad6"];
+	if (leftKeys.includes(e.code)) {
+		previousImage();
+	} else if (rightKeys.includes(e.code)) {
+		nextImage();
+	}
+}
+
 function previousEntry() {
 	const current = "{{ current }}";
 	const currentEl = Array.from(entrySelector.getElementsByTagName("option")).find((o) => o.value === current);
