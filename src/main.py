@@ -65,7 +65,7 @@ def index():
     client_is_on_localhost = int(flask.request.remote_addr == HOST_LOCAL_IP)
     path = flask.request.args.get("path", str(Path.home()), type=str)
     entries, prev = dir_entries(path)
-    return flask.render_template(
+    return flask.stream_template(
         "picker.html",
         entries=entries,
         current=path,
