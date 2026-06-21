@@ -141,7 +141,7 @@ function onKeyDown(e) {
 }
 
 function previousEntry() {
-	const current = "{{ current }}";
+	const current = CURRENT_FOLDER;
 	const currentEl = Array.from(entrySelector.getElementsByTagName("option")).find((o) => o.value === current);
 
 	if (currentEl.previousElementSibling) {
@@ -150,9 +150,9 @@ function previousEntry() {
 }
 
 function nextEntry() {
-	const current = "{{ current }}";
+	const current = CURRENT_FOLDER
 	const currentEl = Array.from(entrySelector.getElementsByTagName("option")).find((o) => o.value === current);
-
+	
 	if (currentEl.nextElementSibling) {
 		changeEntry(currentEl.nextElementSibling.value);
 	}
