@@ -78,6 +78,10 @@
 				<input disabled title="{{ current }}" value="{{ current }}"/>
 			</label>
 
+			<button onclick="fetch('/open/{{ parent }}', { method: 'POST' })">
+				Open parent folder
+			</button>
+
 			<button onclick="configDialog.close()">Close</button>
 		</dialog>
 		<script id="imagesJson" type="application/json">

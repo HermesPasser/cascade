@@ -1,6 +1,8 @@
+import os
 from pathlib import Path
 import secrets
 import socket
+import subprocess
 import sys
 from urllib.parse import quote_plus, unquote_plus
 
@@ -73,6 +75,22 @@ def index():
         localhost=HOST_LOCAL_IP + ":5000",
         client_is_on_localhost=client_is_on_localhost,
     )
+
+
+@app.post("/open/<path:file>")
+def open_on_filesystem(file: str):
+    unquoted = unquote_plus("/" + file)
+    if sys.platform == "win32":
+        command = "explorer"
+    elif sys.platform == "linux":
+        command = "xdg-open"
+    else:
+        command = None
+
+    if command:
+        subprocess.run([command, unquoted])
+
+    return {}, 204
 
 
 @app.get("/file/<path:file>")
