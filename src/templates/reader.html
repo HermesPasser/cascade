@@ -78,7 +78,7 @@
 				<input disabled title="{{ current }}" value="{{ current }}"/>
 			</label>
 
-			<button onclick="fetch('/open/{{ parent }}', { method: 'POST' })">
+			<button {% if client_is_on_localhost == 0 %} disabled {% endif %} onclick="fetch('/open/{{ parent }}', { method: 'POST' })">
 				Open parent folder
 			</button>
 

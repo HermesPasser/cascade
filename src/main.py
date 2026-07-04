@@ -149,8 +149,14 @@ def reader():
         flask.flash("Directory/archive has no images")
         return flask.redirect("/")
 
+    client_is_on_localhost = int(flask.request.remote_addr == HOST_LOCAL_IP)
     return flask.render_template(
-        "reader.html", pages=pages, entries=entries, current=og_path, parent=parent
+        "reader.html",
+        pages=pages,
+        entries=entries,
+        current=og_path,
+        parent=parent,
+        client_is_on_localhost=client_is_on_localhost,
     )
 
 
