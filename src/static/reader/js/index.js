@@ -141,18 +141,14 @@ function onKeyDown(e) {
 }
 
 function previousEntry() {
-	const current = CURRENT_FOLDER;
-	const currentEl = Array.from(entrySelector.getElementsByTagName("option")).find((o) => o.value === current);
-
+	const currentEl = entrySelector.options[entrySelector.selectedIndex]
 	if (currentEl.previousElementSibling) {
 		changeEntry(currentEl.previousElementSibling.value);
 	}
 }
 
 function nextEntry() {
-	const current = CURRENT_FOLDER
-	const currentEl = Array.from(entrySelector.getElementsByTagName("option")).find((o) => o.value === current);
-	
+	const currentEl = entrySelector.options[entrySelector.selectedIndex]
 	if (currentEl.nextElementSibling) {
 		changeEntry(currentEl.nextElementSibling.value);
 	}

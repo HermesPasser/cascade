@@ -31,7 +31,7 @@
 				<button onclick="previousEntry()" class="control-input">&lt;</button>
 				<select id="entrySelector" onchange="changeEntry(event.target.value)" class="control-input">
 					{% for entry in entries %}
-					<option {{ "selected" if current == entry.absolute else "" }} value="{{ entry.absolute }}">
+					<option {{ "selected" if current == entry.absolute else "" }} value="{{ entry.absolute|quote_plus }}">
 						{{ entry.name }}
 					</option>
 					{% endfor %}
@@ -86,12 +86,6 @@
 		</dialog>
 		<script id="imagesJson" type="application/json">
 			{{ pages|tojson }}
-		</script>
-		<script>
-			// Flask will only replace on the files actually its render
-			// so we need to 'store' those values on globals so the js can
-			// access it
-			var CURRENT_FOLDER = '{{ current }}'
 		</script>
 		<script src="{{ url_for('static', filename='reader/js/index.js') }}"></script>
 	</body>
