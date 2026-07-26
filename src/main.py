@@ -115,8 +115,14 @@ def unzip():
     else:
         descompressed_path = unzip_file(file)
 
+    page = flask.request.args.get("page", "")
     return flask.redirect(
-        "/reader?file=" + descompressed_path + "&original_path=" + quote_plus(file)
+        "/reader?file="
+        + descompressed_path
+        + "&original_path="
+        + quote_plus(file)
+        + "&page="
+        + page
     )
 
 
