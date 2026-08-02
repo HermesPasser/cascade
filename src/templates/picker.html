@@ -3,7 +3,7 @@
 	<head>
 		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
 		<meta charset="utf-8" />
-		<title>{{ current.split('/')|last }} - File list - Cascade </title>
+		<title>{{ current.split('/')|last }} - File list - Cascade</title>
 		<link rel="stylesheet" href="{{ url_for('static', filename='picker/style.css') }}" />
 	</head>
 
@@ -42,6 +42,19 @@
 						/>
 						<label for="modeThumb">Thumbnail mode</label>
 					</div>
+
+					<!-- Prettier breaks the jinja if in this case, so we disable for the line -->
+					<!-- prettier-ignore -->
+					<button
+						{% if client_is_on_localhost=="0" %}
+						disabled
+						{%
+						endif
+						%}
+						onclick="fetch('/open/{{ current }}', { method: 'POST' })"
+					>
+						Open folder on file system
+					</button>
 					<input
 						id="search"
 						type="text"
@@ -66,10 +79,12 @@
 							if
 							entry.file
 							%}
+							title="Read file"
 							href="/unzip?file={{ entry.absolute|quote_plus }}"
 							{%
 							else
 							%}
+							title="Read folder"
 							href="/reader?file={{ entry.absolute|quote_plus }}"
 							{%
 							endif
