@@ -3,7 +3,7 @@ import secrets
 import socket
 import subprocess
 import sys
-from urllib.parse import quote_plus, unquote_plus
+from urllib.parse import quote, unquote
 
 import flask
 
@@ -18,7 +18,7 @@ from unzip import unzip_file
 
 app = flask.Flask(__name__)
 app.secret_key = secrets.SystemRandom().randbytes(100000)
-app.jinja_env.filters["quote_plus"] = lambda u: quote_plus(u, safe="/")
+app.jinja_env.filters["quote"] = lambda u: quote(u, safe="/")
 HOST_LOCAL_IP = socket.gethostbyname("localhost")
 
 
@@ -78,7 +78,7 @@ def index():
 
 @app.post("/open/<path:file>")
 def open_on_filesystem(file: str):
-    unquoted = unquote_plus("/" + file)
+    unquoted = unquote("/" + file)
     if sys.platform == "win32":
         command = "explorer"
     elif sys.platform == "linux":
@@ -95,7 +95,7 @@ def open_on_filesystem(file: str):
 @app.get("/file/<path:file>")
 def file(file: str):
     # TODO: handle permissions
-    unquoted = unquote_plus("/" + file)
+    unquoted = unquote("/" + file)
     mode = flask.request.args.get("mode")
     path = Path(downsize(unquoted) if mode == "thumb" else unquoted)
     return flask.send_from_directory(path.parent, path.name, as_attachment=False)
@@ -119,7 +119,7 @@ def unzip():
         "/reader?file="
         + descompressed_path
         + "&original_path="
-        + quote_plus(file)
+        + quote(file)
         + "&page="
         + page
     )
@@ -132,7 +132,7 @@ def reader():
         flask.flash("No folder provided")
         return flask.redirect("/picker")
 
-    folder = unquote_plus(folder)
+    folder = unquote(folder)
     # TODO: maybe we should check if the entries contain any *files*
     # We get the original path since we open files on a temp folder but we
     # want to show the directory from the original file.
@@ -142,11 +142,11 @@ def reader():
     if not Path(folder).exists() and og_path:
         flask.flash("Neither temp folder nor original folder exists")
         return flask.redirect(
-            f"/unzip?file={quote_plus(og_path)}&page="
+            f"/unzip?file={quote(og_path)}&page="
             + flask.request.args.get("page", "")
         )
 
-    pages = ["/file" + quote_plus(img) for img in list_images_from_folder(folder)]
+    pages = ["/file" + quote(img) for img in list_images_from_folder(folder)]
     parent = str(Path(og_path).parent)
     entries, _ = dir_entries(parent)
 

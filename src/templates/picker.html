@@ -63,7 +63,7 @@
 					/>
 				</div>
 				<div>
-					<p><a href="/picker?path={{ prev|quote_plus }}">{{ prev }}</a> (parent)</p>
+					<p><a href="/picker?path={{ prev|quote }}">{{ prev }}</a> (parent)</p>
 					<p id="note">Drag and drop or select a folder or file below</p>
 				</div>
 			</div>
@@ -80,18 +80,18 @@
 							entry.file
 							%}
 							title="Read file"
-							href="/unzip?file={{ entry.absolute|quote_plus }}"
+							href="/unzip?file={{ entry.absolute|quote }}"
 							{%
 							else
 							%}
 							title="Read folder"
-							href="/reader?file={{ entry.absolute|quote_plus }}"
+							href="/reader?file={{ entry.absolute|quote }}"
 							{%
 							endif
 							%}
 						>
 							<img
-								src="file/{{ entry.thumbnail }}?mode=thumb"
+								src="file/{{ entry.thumbnail|quote }}?mode=thumb"
 								alt="{{ entry.name }}"
 								onerror="this.src = `{{ url_for('static', filename='picker/nocover.svg') }}`"
 							/>
@@ -104,9 +104,9 @@
 						onmouseleave="updateThumbnail(event)"
 					>
 						{% if entry.file %} {{ '📄 ' }}
-						<a href="/file/{{ entry.absolute|quote_plus }}">{{ entry.name }}</a>
+						<a href="/file/{{ entry.absolute|quote }}">{{ entry.name }}</a>
 						{% else %} {{ '📂 ' }}
-						<a href="/picker?path={{ entry.absolute|quote_plus }}">{{ entry.name }}</a>
+						<a href="/picker?path={{ entry.absolute|quote }}">{{ entry.name }}</a>
 						{% endif %}
 					</p>
 
@@ -115,13 +115,13 @@
 						{% if entry.file %}
 						<button
 							id="selectEntry"
-							onclick="window.location = '/unzip?file={{ entry.absolute|quote_plus }}'"
+							onclick="window.location = '/unzip?file={{ entry.absolute|quote }}'"
 						>
 							Select
 						</button>
 						{% else%}
 						<form id="selectEntry" action="/reader">
-							<input type="hidden" name="file" value="{{ entry.absolute|quote_plus }}" />
+							<input type="hidden" name="file" value="{{ entry.absolute|quote }}" />
 							<button>Select</button>
 						</form>
 						{% endif %}

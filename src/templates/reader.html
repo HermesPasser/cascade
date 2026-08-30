@@ -31,7 +31,7 @@
 				<button onclick="previousEntry()" class="control-input">&lt;</button>
 				<select id="entrySelector" onchange="changeEntry(event.target.value)" class="control-input">
 					{% for entry in entries %}
-					<option {{ "selected" if current == entry.absolute else "" }} value="{{ entry.absolute|quote_plus }}">
+					<option {{ "selected" if current == entry.absolute else "" }} value="{{ entry.absolute|quote }}">
 						{{ entry.name }}
 					</option>
 					{% endfor %}
