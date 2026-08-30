@@ -76,24 +76,22 @@ def downsize(filename: str):
         return filename
 
 
+@lru_cache
 def _get_thumbnail(
     filename: str,
 ):
-    """This get the first image in the path that we find, not the _fist_ image"""
+    """This get the first image in the path that we find, not the _first_ image"""
     full = Path(filename)
     filter_fn = lambda file: any(
         file.lower().endswith(e) for e in SUPPORTED_IMAGE_EXTENSIONS
     )
 
-    # If the path is a file, then the file is an archive. Get the first image form it
+    # If the path is a file, then the file is an archive. Get the first image from it
     if full.is_file():
         return get_first_file(full, filter_fn) or ""
 
-    try:
-        # If is not an archive, then is a folder. Get the first image we can find from that folder
-        return str(next(iterate_images(full)))
-    except StopIteration:
-        pass
+    if images := sorted(iterate_images(full)):
+        return str(images[0])
 
     try:
         # If the folder has no images, look for the first archive we found in that
